@@ -1,0 +1,77 @@
+# TomNAP Development Rules
+
+## Code Style
+- Use TypeScript strictly with no any types
+- Prefer const over let, never use var
+- Use arrow functions for components
+- Use function keyword for utilities
+- Always add proper TypeScript types
+- Use Zod for runtime validation
+
+## React/Next.js Patterns
+- Use Server Components by default
+- Add "use client" only when needed
+- Implement error boundaries
+- Use Suspense for async components
+- Prefer RSC data fetching over useEffect
+- Use Next.js Image for all images
+- Implement proper loading states
+
+## Component Structure
+- One component per file
+- Props interface above component
+- Export at bottom of file
+- Use composition over inheritance
+- Implement proper accessibility
+
+## State Management
+- Zustand for global state
+- React Query for server state
+- useState for local state
+- useReducer for complex local state
+
+## Styling
+- Tailwind CSS only
+- No inline styles except for dynamic values
+- Use cn() utility for conditional classes
+- Mobile-first responsive design
+- Dark mode support by default
+
+## Performance
+- Lazy load heavy components
+- Optimize images (WebP, AVIF)
+- Use React.memo sparingly
+- Implement virtual scrolling for lists
+- Add proper caching headers
+
+## Security
+- Validate all inputs with Zod
+- Sanitize user content
+- Use CSRF protection
+- Implement rate limiting
+- Never expose sensitive keys
+
+## Git Commits
+- Use conventional commits
+- feat: new feature
+- fix: bug fix
+- docs: documentation
+- style: formatting
+- refactor: code restructuring
+- test: adding tests
+- chore: maintenance
+
+## Testing
+- Write tests for critical paths
+- Use React Testing Library
+- Mock external dependencies
+- Test error states
+- Aim for 80% coverage
+
+## Comments
+- Explain WHY, not WHAT
+- Use JSDoc for functions
+- Document complex algorithms
+- Add TODO with ticket numbers
+
+
