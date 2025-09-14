@@ -1,6 +1,9 @@
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
+// Import security configuration
+const { securityHeaders } = require('./next-security.config.js')
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ['lightningcss', 'lightningcss-darwin-arm64', '@tailwindcss/node'],
@@ -46,35 +49,48 @@ const nextConfig: NextConfig = {
   httpAgentOptions: {
     keepAlive: true,
   },
-  // PWA Headers
+  // Security and PWA Headers
   async headers() {
     return [
       {
+        // Apply comprehensive security headers to all routes
         source: '/(.*)',
+        headers: securityHeaders,
+      },
+      {
+        // Additional headers for API routes
+        source: '/api/(.*)',
         headers: [
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate'
           },
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: 'X-API-Version',
+            value: '1.0.0'
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS'
           },
           {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-          },
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization, X-Requested-With'
+          }
         ],
       },
       {
+        // Cache headers for static assets
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ],
+      },
+      {
+        // Service Worker - no cache
         source: '/sw.js',
         headers: [
           {
@@ -85,9 +101,14 @@ const nextConfig: NextConfig = {
             key: 'Cache-Control',
             value: 'no-cache, no-store, must-revalidate',
           },
+          {
+            key: 'Service-Worker-Allowed',
+            value: '/'
+          }
         ],
       },
       {
+        // PWA Manifest
         source: '/manifest.json',
         headers: [
           {
@@ -97,6 +118,16 @@ const nextConfig: NextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=3600',
+          },
+        ],
+      },
+      {
+        // Sitemap and robots for SEO
+        source: '/(sitemap.xml|robots.txt|feed.xml)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, s-maxage=3600',
           },
         ],
       },

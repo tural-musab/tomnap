@@ -7,6 +7,74 @@ const RATE_LIMIT_MAX_REQUESTS = 120
 type Counter = { count: number; resetAt: number }
 const ipCounters = new Map<string, Counter>()
 
+// Security headers configuration
+function addSecurityHeaders(response: NextResponse): NextResponse {
+  // Content Security Policy
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.sentry-io https://browser.sentry-io https://vercel.live",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https: blob:",
+    "media-src 'self' https: blob:",
+    "connect-src 'self' https: wss: blob:",
+    "frame-src 'self' https://js.sentry-io https://vercel.live",
+    "worker-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "upgrade-insecure-requests"
+  ].join('; ')
+  
+  // Security Headers
+  const headers = {
+    // Content Security Policy
+    'Content-Security-Policy': csp,
+    
+    // Prevent clickjacking
+    'X-Frame-Options': 'DENY',
+    
+    // Prevent MIME type sniffing
+    'X-Content-Type-Options': 'nosniff',
+    
+    // Enable XSS protection
+    'X-XSS-Protection': '1; mode=block',
+    
+    // Referrer Policy
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    
+    // Permissions Policy (formerly Feature Policy)
+    'Permissions-Policy': [
+      'camera=()',
+      'microphone=()',
+      'geolocation=(self)',
+      'interest-cohort=()',
+      'browsing-topics=()'
+    ].join(', '),
+    
+    // Strict Transport Security (HSTS)
+    'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+    
+    // Cross-Origin Policies
+    'Cross-Origin-Embedder-Policy': 'unsafe-none',
+    'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
+    
+    // Additional security headers
+    'X-DNS-Prefetch-Control': 'on',
+    'X-Download-Options': 'noopen',
+    'X-Permitted-Cross-Domain-Policies': 'none'
+  }
+  
+  // Apply headers
+  Object.entries(headers).forEach(([key, value]) => {
+    response.headers.set(key, value)
+  })
+  
+  return response
+}
+
 // Auth gerektiren route'lar
 const protectedRoutes = [
   '/profile',
@@ -40,11 +108,23 @@ export async function middleware(request: NextRequest) {
   } else {
     current.count += 1
     if (current.count > RATE_LIMIT_MAX_REQUESTS) {
-      const res = NextResponse.json({ error: 'Too Many Requests' }, { status: 429 })
+      const res = NextResponse.json({ 
+        error: 'Too Many Requests',
+        message: 'Rate limit exceeded. Please try again later.',
+        retryAfter: Math.ceil((current.resetAt - now) / 1000)
+      }, { status: 429 })
       res.headers.set('Retry-After', Math.ceil((current.resetAt - now) / 1000).toString())
-      return res
+      res.headers.set('X-RateLimit-Limit', RATE_LIMIT_MAX_REQUESTS.toString())
+      res.headers.set('X-RateLimit-Remaining', '0')
+      res.headers.set('X-RateLimit-Reset', current.resetAt.toString())
+      return addSecurityHeaders(res)
     }
   }
+  
+  // Add rate limit headers to successful requests
+  response.headers.set('X-RateLimit-Limit', RATE_LIMIT_MAX_REQUESTS.toString())
+  response.headers.set('X-RateLimit-Remaining', (RATE_LIMIT_MAX_REQUESTS - (current?.count || 1)).toString())
+  response.headers.set('X-RateLimit-Reset', (current?.resetAt || now + RATE_LIMIT_WINDOW_MS).toString())
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -101,15 +181,20 @@ export async function middleware(request: NextRequest) {
 
   // Giriş yapmamış kullanıcı protected route'a gitmeye çalışıyor
   if (isProtectedRoute && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirectTo', path)
+    const redirectResponse = NextResponse.redirect(loginUrl)
+    return addSecurityHeaders(redirectResponse)
   }
 
   // Giriş yapmış kullanıcı auth route'a gitmeye çalışıyor
   if (isAuthRoute && user) {
-    return NextResponse.redirect(new URL('/feed', request.url))
+    const feedResponse = NextResponse.redirect(new URL('/feed', request.url))
+    return addSecurityHeaders(feedResponse)
   }
   
-  return response
+  // Add security headers to all responses
+  return addSecurityHeaders(response)
 }
 
 export const config = {
