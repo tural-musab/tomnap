@@ -8,6 +8,7 @@ import VideoOverlay from './video-overlay'
 import ProductSheet from './product-sheet'
 import { useIntersection } from '@/hooks/use-intersection'
 import { usePerformanceMonitor } from '@/lib/performance'
+// import { usePagePerformanceTracking } from '@/hooks/use-performance-tracking'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -35,12 +36,15 @@ interface VideoWithProducts {
   video_products: Array<{ product?: Product }>
 }
 
-export default function VideoFeed() {
+export default function VideoFeed(): React.ReactElement {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
   const { recordUserAction, startTimer, endTimer, recordMetric } = usePerformanceMonitor()
+  
+  // Performance tracking ready for future use
+  // const { trackInteraction, trackResourceLoad, markMilestone } = usePagePerformanceTracking('video-feed')
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error } = useInfiniteQuery({
     queryKey: ['videos'],
@@ -86,7 +90,7 @@ export default function VideoFeed() {
   })
 
   const videos = (data?.pages.flat() as VideoWithProducts[]) ?? []
-  const currentVideo = videos[currentIndex]
+  // const currentVideo = videos[currentIndex] // Ready for future use
 
   const lastVideoRef = useRef<HTMLDivElement>(null)
   const intersection = useIntersection(lastVideoRef, {

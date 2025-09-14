@@ -9,6 +9,7 @@ import { AuthProvider } from '@/providers/auth-provider'
 import { QueryProvider } from '@/providers/query-provider'
 import { PerformanceProvider } from '@/providers/performance-provider'
 import AsyncErrorBoundary from '@/components/async-error-boundary'
+import { WebVitalsReporter, WebVitalsDiagnostics } from '@/components/web-vitals-reporter'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -181,6 +182,8 @@ export default async function RootLayout({
               <QueryProvider>
                 {children}
                 <SonnerToaster />
+                <WebVitalsReporter />
+                <WebVitalsDiagnostics />
               </QueryProvider>
             </AuthProvider>
           </PerformanceProvider>
