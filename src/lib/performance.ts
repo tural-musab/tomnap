@@ -1,6 +1,6 @@
 /**
  * Performance Monitoring Library
- * 
+ *
  * Comprehensive performance tracking, metrics collection, and optimization
  * for the TomNAP application with Web Vitals and custom metrics.
  */
@@ -75,11 +75,11 @@ class PerformanceMonitor {
       bufferSize: 100,
       flushInterval: 30000, // 30 seconds
       enableConsoleLog: process.env.NODE_ENV === 'development',
-      ...config
+      ...config,
     }
 
     this.sessionId = this.generateSessionId()
-    
+
     if (typeof window !== 'undefined') {
       this.initialize()
     }
@@ -116,18 +116,17 @@ class PerformanceMonitor {
 
   private async initWebVitals(): Promise<void> {
     try {
-      const { getCLS, getFCP, getFID, getINP, getLCP, getTTFB } = await import('web-vitals')
-      
+      const { onCLS, onFCP, onINP, onLCP, onTTFB } = await import('web-vitals')
+
       const vitalsCallback = (metric: WebVitalsMetric) => {
         this.recordWebVital(metric)
       }
 
-      getCLS(vitalsCallback)
-      getFCP(vitalsCallback)
-      getFID(vitalsCallback)
-      getINP(vitalsCallback)
-      getLCP(vitalsCallback)
-      getTTFB(vitalsCallback)
+      onCLS(vitalsCallback)
+      onFCP(vitalsCallback)
+      onINP(vitalsCallback)
+      onLCP(vitalsCallback)
+      onTTFB(vitalsCallback)
     } catch (error) {
       console.warn('Failed to initialize Web Vitals:', error)
     }
@@ -182,7 +181,7 @@ class PerformanceMonitor {
       url: window.location.href,
       sessionId: this.sessionId,
       device: this.getDeviceInfo(),
-      connection: this.getConnectionInfo()
+      connection: this.getConnectionInfo(),
     }
 
     this.addMetric(performanceMetric)
@@ -203,7 +202,7 @@ class PerformanceMonitor {
       unit: 'ms',
       timestamp: Date.now(),
       url: entry.name,
-      sessionId: this.sessionId
+      sessionId: this.sessionId,
     }
 
     this.addMetric(metric)
@@ -216,7 +215,7 @@ class PerformanceMonitor {
         unit: 'bytes',
         timestamp: Date.now(),
         url: entry.name,
-        sessionId: this.sessionId
+        sessionId: this.sessionId,
       }
       this.addMetric(sizeMetric)
     }
@@ -228,9 +227,12 @@ class PerformanceMonitor {
       { name: 'navigation_tcp_connect', value: entry.connectEnd - entry.connectStart },
       { name: 'navigation_request', value: entry.responseStart - entry.requestStart },
       { name: 'navigation_response', value: entry.responseEnd - entry.responseStart },
-      { name: 'navigation_dom_content_loaded', value: entry.domContentLoadedEventEnd - entry.domContentLoadedEventStart },
+      {
+        name: 'navigation_dom_content_loaded',
+        value: entry.domContentLoadedEventEnd - entry.domContentLoadedEventStart,
+      },
       { name: 'navigation_load_complete', value: entry.loadEventEnd - entry.loadEventStart },
-      { name: 'navigation_total', value: entry.loadEventEnd - entry.navigationStart }
+      { name: 'navigation_total', value: entry.loadEventEnd - entry.navigationStart },
     ]
 
     navigationMetrics.forEach(({ name, value }) => {
@@ -241,7 +243,7 @@ class PerformanceMonitor {
           unit: 'ms',
           timestamp: Date.now(),
           url: window.location.href,
-          sessionId: this.sessionId
+          sessionId: this.sessionId,
         })
       }
     })
@@ -254,7 +256,7 @@ class PerformanceMonitor {
       unit: entry.entryType === 'measure' ? 'ms' : 'timestamp',
       timestamp: Date.now(),
       url: window.location.href,
-      sessionId: this.sessionId
+      sessionId: this.sessionId,
     }
 
     this.addMetric(metric)
@@ -262,7 +264,7 @@ class PerformanceMonitor {
 
   private getResourceType(url: string): string {
     const extension = url.split('.').pop()?.toLowerCase()
-    
+
     if (['js', 'mjs'].includes(extension || '')) return 'script'
     if (['css'].includes(extension || '')) return 'style'
     if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(extension || '')) return 'image'
@@ -270,7 +272,7 @@ class PerformanceMonitor {
     if (['mp4', 'webm', 'ogg'].includes(extension || '')) return 'video'
     if (['mp3', 'wav', 'ogg'].includes(extension || '')) return 'audio'
     if (url.includes('/api/')) return 'api'
-    
+
     return 'other'
   }
 
@@ -287,20 +289,24 @@ class PerformanceMonitor {
     return {
       type: deviceType,
       os: this.getOS(ua),
-      browser: this.getBrowser(ua)
+      browser: this.getBrowser(ua),
     }
   }
 
   private getConnectionInfo(): PerformanceMetric['connection'] {
     if (typeof window === 'undefined' || !('connection' in navigator)) return undefined
 
-    const connection = (navigator as unknown as { connection?: { effectiveType?: string; downlink?: number; rtt?: number } }).connection
+    const connection = (
+      navigator as unknown as {
+        connection?: { effectiveType?: string; downlink?: number; rtt?: number }
+      }
+    ).connection
     if (!connection) return undefined
-    
+
     return {
       effectiveType: connection.effectiveType || 'unknown',
       downlink: connection.downlink || 0,
-      rtt: connection.rtt || 0
+      rtt: connection.rtt || 0,
     }
   }
 
@@ -375,17 +381,17 @@ class PerformanceMonitor {
         userAgent: navigator.userAgent,
         url: window.location.href,
         timestamp: Date.now(),
-        sessionId: this.sessionId
-      }
+        sessionId: this.sessionId,
+      },
     }
 
     await fetch(this.config.endpoint, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
-      keepalive: true
+      keepalive: true,
     })
   }
 
@@ -399,7 +405,7 @@ class PerformanceMonitor {
       unit: 'count',
       timestamp: metric.timestamp || Date.now(),
       url: window.location.href,
-      sessionId: this.sessionId
+      sessionId: this.sessionId,
     }
 
     this.addMetric(performanceMetric)
@@ -424,8 +430,8 @@ class PerformanceMonitor {
       value: 1,
       labels: {
         url: window.location.pathname,
-        referrer: document.referrer
-      }
+        referrer: document.referrer,
+      },
     })
   }
 
@@ -433,7 +439,7 @@ class PerformanceMonitor {
     this.recordCustomMetric({
       name: `user_action_${action}`,
       value: 1,
-      labels: details
+      labels: details,
     })
   }
 
@@ -443,8 +449,8 @@ class PerformanceMonitor {
       value: duration,
       labels: {
         endpoint,
-        status: status.toString()
-      }
+        status: status.toString(),
+      },
     })
 
     this.recordCustomMetric({
@@ -452,8 +458,8 @@ class PerformanceMonitor {
       value: 1,
       labels: {
         endpoint,
-        status: status.toString()
-      }
+        status: status.toString(),
+      },
     })
   }
 
@@ -485,7 +491,7 @@ class PerformanceMonitor {
 export const performanceMonitor = new PerformanceMonitor({
   endpoint: '/api/performance',
   enableConsoleLog: process.env.NODE_ENV === 'development',
-  sampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0
+  sampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 })
 
 // React Hook for performance monitoring
@@ -496,27 +502,30 @@ export function usePerformanceMonitor(): {
   recordPageView: () => void
   recordUserAction: (action: string, details?: Record<string, unknown>) => void
 } {
-  return React.useMemo(() => ({
-  const recordMetric = (metric: CustomMetric) => {
-    performanceMonitor.recordCustomMetric(metric)
-  }
+  return React.useMemo(
+    () => ({
+      recordMetric: (metric: CustomMetric) => {
+        performanceMonitor.recordCustomMetric(metric)
+      },
 
-  const startTimer = (name: string) => {
-    performanceMonitor.startTimer(name)
-  }
+      startTimer: (name: string) => {
+        performanceMonitor.startTimer(name)
+      },
 
-  const endTimer = (name: string) => {
-    performanceMonitor.endTimer(name)
-  }
+      endTimer: (name: string) => {
+        performanceMonitor.endTimer(name)
+      },
 
-  const recordPageView = () => {
-    performanceMonitor.recordPageView()
-  }
+      recordPageView: () => {
+        performanceMonitor.recordPageView()
+      },
 
-    recordUserAction: (action: string, details?: Record<string, unknown>) => {
-      performanceMonitor.recordUserAction(action, details)
-    }
-  }), [])
+      recordUserAction: (action: string, details?: Record<string, unknown>) => {
+        performanceMonitor.recordUserAction(action, details)
+      },
+    }),
+    []
+  )
 }
 
 // Higher-order component for automatic performance tracking
@@ -526,11 +535,12 @@ export function withPerformanceTracking<P extends object>(
 ): React.ComponentType<P> {
   const WithPerformanceTracking = (props: P) => {
     const { startTimer, endTimer } = usePerformanceMonitor()
-    
+
     React.useEffect(() => {
-      const name = componentName || WrappedComponent.displayName || WrappedComponent.name || 'Component'
+      const name =
+        componentName || WrappedComponent.displayName || WrappedComponent.name || 'Component'
       startTimer(`component_render_${name}`)
-      
+
       return () => {
         endTimer(`component_render_${name}`)
       }
@@ -540,7 +550,7 @@ export function withPerformanceTracking<P extends object>(
   }
 
   WithPerformanceTracking.displayName = `withPerformanceTracking(${WrappedComponent.displayName || WrappedComponent.name})`
-  
+
   return WithPerformanceTracking
 }
 

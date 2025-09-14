@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { getCLS, getFCP, getFID, getLCP, getTTFB, getINP, type Metric } from 'web-vitals'
+import { onCLS, onFCP, onLCP, onTTFB, onINP, type Metric } from 'web-vitals'
 
 /**
  * Web Vitals Reporter Component
@@ -27,7 +27,9 @@ export function WebVitalsReporter(): null {
             timestamp: Date.now(),
             url: window.location.href,
             userAgent: navigator.userAgent,
-            connectionType: (navigator as Navigator & { connection?: { effectiveType?: string } }).connection?.effectiveType || 'unknown',
+            connectionType:
+              (navigator as Navigator & { connection?: { effectiveType?: string } }).connection
+                ?.effectiveType || 'unknown',
           }),
         })
 
@@ -47,23 +49,21 @@ export function WebVitalsReporter(): null {
     }
 
     // Register all Web Vitals metrics
-    getCLS(reportMetric)
-    getFCP(reportMetric)
-    getFID(reportMetric)
-    getLCP(reportMetric)
-    getTTFB(reportMetric)
-    getINP(reportMetric)
+    onCLS(reportMetric)
+    onFCP(reportMetric)
+    onLCP(reportMetric)
+    onTTFB(reportMetric)
+    onINP(reportMetric)
 
     // Report custom page visibility metrics
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         // Page is being hidden, good time to report final metrics
-        getCLS(reportMetric, { reportAllChanges: true })
-        getFCP(reportMetric, { reportAllChanges: true })
-        getFID(reportMetric, { reportAllChanges: true })
-        getLCP(reportMetric, { reportAllChanges: true })
-        getTTFB(reportMetric, { reportAllChanges: true })
-        getINP(reportMetric, { reportAllChanges: true })
+        onCLS(reportMetric, { reportAllChanges: true })
+        onFCP(reportMetric, { reportAllChanges: true })
+        onLCP(reportMetric, { reportAllChanges: true })
+        onTTFB(reportMetric, { reportAllChanges: true })
+        onINP(reportMetric, { reportAllChanges: true })
       }
     }
 
@@ -149,11 +149,15 @@ export function WebVitalsDiagnostics(): null {
       }
 
       const existingMetrics = diagnosticsElement!.innerHTML
-      const color = metric.rating === 'good' ? '#00ff00' : 
-                   metric.rating === 'needs-improvement' ? '#ffaa00' : '#ff0000'
+      const color =
+        metric.rating === 'good'
+          ? '#00ff00'
+          : metric.rating === 'needs-improvement'
+            ? '#ffaa00'
+            : '#ff0000'
 
       const metricLine = `<div style="color: ${color}">${metric.name}: ${metric.value.toFixed(2)}ms (${metric.rating})</div>`
-      
+
       if (existingMetrics.includes(`${metric.name}:`)) {
         diagnosticsElement!.innerHTML = existingMetrics.replace(
           new RegExp(`<div[^>]*>${metric.name}:.*?</div>`),
@@ -164,12 +168,11 @@ export function WebVitalsDiagnostics(): null {
       }
     }
 
-    getCLS(updateDiagnostics)
-    getFCP(updateDiagnostics)
-    getFID(updateDiagnostics)
-    getLCP(updateDiagnostics)
-    getTTFB(updateDiagnostics)
-    getINP(updateDiagnostics)
+    onCLS(updateDiagnostics)
+    onFCP(updateDiagnostics)
+    onLCP(updateDiagnostics)
+    onTTFB(updateDiagnostics)
+    onINP(updateDiagnostics)
 
     return () => {
       if (diagnosticsElement) {

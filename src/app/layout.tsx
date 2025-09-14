@@ -9,7 +9,7 @@ import { AuthProvider } from '@/providers/auth-provider'
 import { QueryProvider } from '@/providers/query-provider'
 import { PerformanceProvider } from '@/providers/performance-provider'
 import AsyncErrorBoundary from '@/components/async-error-boundary'
-import { WebVitalsReporter, WebVitalsDiagnostics } from '@/components/web-vitals-reporter'
+import { WebVitalsDiagnostics } from '@/components/web-vitals-reporter'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -24,9 +24,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: {
     default: 'TomNAP - Sosyal E-Ticaret Platformu',
-    template: '%s | TomNAP'
+    template: '%s | TomNAP',
   },
-  description: 'Video ile alışverişin buluştuğu sosyal platform. TikTok tarzı video akışında ürünleri keşfedin, anında satın alın.',
+  description:
+    'Video ile alışverişin buluştuğu sosyal platform. TikTok tarzı video akışında ürünleri keşfedin, anında satın alın.',
   keywords: [
     'e-ticaret',
     'sosyal ticaret',
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
     'influencer marketing',
     'sosyal medya alışveriş',
     'video commerce',
-    'live shopping'
+    'live shopping',
   ],
   authors: [{ name: 'TomNAP Team', url: 'https://tomnap.com/about' }],
   creator: 'TomNAP',
@@ -55,11 +56,13 @@ export const metadata: Metadata = {
       'en-US': '/en',
     },
     types: {
-      'application/rss+xml': [{
-        url: '/feed.xml',
-        title: 'TomNAP RSS Feed'
-      }]
-    }
+      'application/rss+xml': [
+        {
+          url: '/feed.xml',
+          title: 'TomNAP RSS Feed',
+        },
+      ],
+    },
   },
   openGraph: {
     title: 'TomNAP - Sosyal E-Ticaret Platformu',
@@ -83,12 +86,14 @@ export const metadata: Metadata = {
     description: 'Video ile alışverişin buluştuğu sosyal platform',
     creator: '@tomnap',
     site: '@tomnap',
-    images: [{
-      url: '/twitter-image.png',
-      width: 1200,
-      height: 630,
-      alt: 'TomNAP - Video ile Sosyal Alışveriş'
-    }],
+    images: [
+      {
+        url: '/twitter-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'TomNAP - Video ile Sosyal Alışveriş',
+      },
+    ],
   },
   robots: {
     index: true,
@@ -158,40 +163,36 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-title" content="TomNAP" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#9333ea" />
-        
+
         {/* Microsoft Tiles */}
         <meta name="msapplication-TileColor" content="#9333ea" />
         <meta name="msapplication-tap-highlight" content="no" />
-        
+
         {/* Links */}
         <link rel="manifest" href="/manifest.json" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#9333ea" />
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
-      <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}>
-        <AsyncErrorBoundary
-          onError={(error) => {
-            // Log to console in development
-            if (process.env.NODE_ENV === 'development') {
-              console.error('Root level error:', error)
-            }
-          }}
-        >
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
+      >
+        {/* Client bileşenlerine fonksiyon prop geçmemek için ErrorBoundary wrapper'ını varsayılan ayarlarla kullanıyoruz */}
+        <AsyncErrorBoundary>
           <PerformanceProvider>
             <AuthProvider>
               <QueryProvider>
                 {children}
                 <SonnerToaster />
-                <WebVitalsReporter />
                 <WebVitalsDiagnostics />
               </QueryProvider>
             </AuthProvider>
           </PerformanceProvider>
         </AsyncErrorBoundary>
-        
+
         {/* PWA Service Worker Registration */}
         <RegisterSW />
-        
+
         {/* Structured Data - Organization */}
         <Script
           id="organization-schema"
@@ -206,24 +207,24 @@ export default async function RootLayout({
               sameAs: [
                 'https://twitter.com/tomnap',
                 'https://instagram.com/tomnap',
-                'https://facebook.com/tomnap'
+                'https://facebook.com/tomnap',
               ],
               contactPoint: {
                 '@type': 'ContactPoint',
                 telephone: '+90-555-000-0000',
                 contactType: 'Customer Support',
                 email: 'support@tomnap.com',
-                availableLanguage: ['Turkish', 'English']
+                availableLanguage: ['Turkish', 'English'],
               },
               address: {
                 '@type': 'PostalAddress',
                 addressCountry: 'TR',
-                addressLocality: 'Istanbul'
-              }
+                addressLocality: 'Istanbul',
+              },
             }),
           }}
         />
-        
+
         {/* Structured Data - WebApplication */}
         <Script
           id="webapp-schema"
@@ -233,7 +234,8 @@ export default async function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'WebApplication',
               name: 'TomNAP',
-              description: 'Video ile alışverişin buluştuğu sosyal e-ticaret platformu. TikTok tarzı video akışında ürünleri keşfedin, anında satın alın.',
+              description:
+                'Video ile alışverişin buluştuğu sosyal e-ticaret platformu. TikTok tarzı video akışında ürünleri keşfedin, anında satın alın.',
               url: 'https://tomnap.com',
               applicationCategory: 'ShoppingApplication',
               operatingSystem: 'Any',
@@ -243,34 +245,34 @@ export default async function RootLayout({
                 '@type': 'Offer',
                 price: '0',
                 priceCurrency: 'TRY',
-                availability: 'https://schema.org/InStock'
+                availability: 'https://schema.org/InStock',
               },
               aggregateRating: {
                 '@type': 'AggregateRating',
                 ratingValue: '4.8',
                 ratingCount: '12543',
                 bestRating: '5',
-                worstRating: '1'
+                worstRating: '1',
               },
               author: {
                 '@type': 'Organization',
-                name: 'TomNAP Team'
+                name: 'TomNAP Team',
               },
               creator: {
                 '@type': 'Organization',
-                name: 'TomNAP'
+                name: 'TomNAP',
               },
               featureList: [
                 'Video tabanlı ürün keşfi',
                 'Anında satın alma',
                 'Sosyal alışveriş deneyimi',
                 'Güvenli ödeme sistemi',
-                'Mobil optimize'
-              ]
+                'Mobil optimize',
+              ],
             }),
           }}
         />
-        
+
         {/* Structured Data - WebSite with Search Action */}
         <Script
           id="website-schema"
@@ -286,9 +288,9 @@ export default async function RootLayout({
                 '@type': 'SearchAction',
                 target: {
                   '@type': 'EntryPoint',
-                  urlTemplate: 'https://tomnap.com/search?q={search_term_string}'
+                  urlTemplate: 'https://tomnap.com/search?q={search_term_string}',
                 },
-                'query-input': 'required name=search_term_string'
+                'query-input': 'required name=search_term_string',
               },
               inLanguage: 'tr-TR',
               isAccessibleForFree: true,
@@ -297,15 +299,15 @@ export default async function RootLayout({
                   '@type': 'WebPage',
                   name: 'Video Feed',
                   url: 'https://tomnap.com/feed',
-                  description: 'Ürünleri video formatında keşfedin'
+                  description: 'Ürünleri video formatında keşfedin',
                 },
                 {
                   '@type': 'WebPage',
                   name: 'Keşfet',
                   url: 'https://tomnap.com/explore',
-                  description: 'Popüler ürünleri ve yaratıcıları keşfedin'
-                }
-              ]
+                  description: 'Popüler ürünleri ve yaratıcıları keşfedin',
+                },
+              ],
             }),
           }}
         />

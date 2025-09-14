@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useCallback, useRef, useMemo } from 'react'
-import { getCLS, getFCP, getFID, getLCP, getTTFB, getINP, type Metric } from 'web-vitals'
+import { onCLS, onFCP, onLCP, onTTFB, onINP, type Metric } from 'web-vitals'
 
 /**
  * Performance tracking configuration
@@ -23,88 +23,98 @@ const DEFAULT_CONFIG: PerformanceConfig = {
 /**
  * Comprehensive performance tracking hook
  */
-export function usePerformanceTracking(config: PerformanceConfig = {}): { reportCustomMetric: (name: string, value: number, rating?: 'good' | 'needs-improvement' | 'poor') => void } {
+export function usePerformanceTracking(config: PerformanceConfig = {}): {
+  reportCustomMetric: (
+    name: string,
+    value: number,
+    rating?: 'good' | 'needs-improvement' | 'poor'
+  ) => void
+} {
   const fullConfig = useMemo(() => ({ ...DEFAULT_CONFIG, ...config }), [config])
   const reportedMetrics = useRef<Set<string>>(new Set())
   const reportTimeout = useRef<NodeJS.Timeout | null>(null)
   const pendingReports = useRef<Metric[]>([])
 
-  const reportMetric = useCallback(async (metric: Metric) => {
-    // Avoid duplicate reports
-    const metricKey = `${metric.name}-${metric.id}`
-    if (reportedMetrics.current.has(metricKey)) {
-      return
-    }
-    reportedMetrics.current.add(metricKey)
+  const reportMetric = useCallback(
+    async (metric: Metric) => {
+      // Avoid duplicate reports
+      const metricKey = `${metric.name}-${metric.id}`
+      if (reportedMetrics.current.has(metricKey)) {
+        return
+      }
+      reportedMetrics.current.add(metricKey)
 
-    // Console logging
-    if (fullConfig.enableConsoleLogging) {
-      const color = metric.rating === 'good' ? '🟢' : 
-                   metric.rating === 'needs-improvement' ? '🟡' : '🔴'
-      console.log(`${color} [Web Vitals] ${metric.name}:`, {
-        value: `${metric.value.toFixed(2)}ms`,
-        rating: metric.rating,
-        delta: metric.delta ? `${metric.delta.toFixed(2)}ms` : 'N/A',
-        id: metric.id,
-      })
-    }
-
-    // API reporting with debouncing
-    if (fullConfig.enableApiReporting) {
-      pendingReports.current.push(metric)
-
-      // Clear existing timeout
-      if (reportTimeout.current) {
-        clearTimeout(reportTimeout.current)
+      // Console logging
+      if (fullConfig.enableConsoleLogging) {
+        const color =
+          metric.rating === 'good' ? '🟢' : metric.rating === 'needs-improvement' ? '🟡' : '🔴'
+        console.log(`${color} [Web Vitals] ${metric.name}:`, {
+          value: `${metric.value.toFixed(2)}ms`,
+          rating: metric.rating,
+          delta: metric.delta ? `${metric.delta.toFixed(2)}ms` : 'N/A',
+          id: metric.id,
+        })
       }
 
-      // Set new timeout for batch reporting
-      reportTimeout.current = setTimeout(async () => {
-        const reportsToSend = [...pendingReports.current]
-        pendingReports.current = []
+      // API reporting with debouncing
+      if (fullConfig.enableApiReporting) {
+        pendingReports.current.push(metric)
 
-        try {
-          await fetch(fullConfig.endpoint!, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              metrics: reportsToSend.map(m => ({
-                name: m.name,
-                value: m.value,
-                rating: m.rating,
-                delta: m.delta,
-                id: m.id,
-                navigationType: m.navigationType,
-                timestamp: Date.now(),
-                url: window.location.href,
-                userAgent: navigator.userAgent,
-                connectionType: (navigator as Navigator & { connection?: { effectiveType?: string } }).connection?.effectiveType || 'unknown',
-                viewport: {
-                  width: window.innerWidth,
-                  height: window.innerHeight,
-                },
-              })),
-              sessionId: getSessionId(),
-              pageLoadId: getPageLoadId(),
-            }),
-          })
-        } catch (error) {
-          if (fullConfig.enableConsoleLogging) {
-            console.error('[Web Vitals] Failed to report metrics:', error)
-          }
+        // Clear existing timeout
+        if (reportTimeout.current) {
+          clearTimeout(reportTimeout.current)
         }
-      }, fullConfig.debounceMs)
-    }
-  }, [fullConfig])
+
+        // Set new timeout for batch reporting
+        reportTimeout.current = setTimeout(async () => {
+          const reportsToSend = [...pendingReports.current]
+          pendingReports.current = []
+
+          try {
+            await fetch(fullConfig.endpoint!, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                metrics: reportsToSend.map((m) => ({
+                  name: m.name,
+                  value: m.value,
+                  rating: m.rating,
+                  delta: m.delta,
+                  id: m.id,
+                  navigationType: m.navigationType,
+                  timestamp: Date.now(),
+                  url: window.location.href,
+                  userAgent: navigator.userAgent,
+                  connectionType:
+                    (navigator as Navigator & { connection?: { effectiveType?: string } })
+                      .connection?.effectiveType || 'unknown',
+                  viewport: {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                  },
+                })),
+                sessionId: getSessionId(),
+                pageLoadId: getPageLoadId(),
+              }),
+            })
+          } catch (error) {
+            if (fullConfig.enableConsoleLogging) {
+              console.error('[Web Vitals] Failed to report metrics:', error)
+            }
+          }
+        }, fullConfig.debounceMs)
+      }
+    },
+    [fullConfig]
+  )
 
   useEffect(() => {
     // Register all Web Vitals metrics
-    getCLS(reportMetric)
-    getFCP(reportMetric)
-    getFID(reportMetric)
-    getLCP(reportMetric)
-    getTTFB(reportMetric)
-    getINP(reportMetric)
+    onCLS(reportMetric)
+    onFCP(reportMetric)
+    onLCP(reportMetric)
+    onTTFB(reportMetric)
+    onINP(reportMetric)
 
     return () => {
       if (reportTimeout.current) {
@@ -114,18 +124,21 @@ export function usePerformanceTracking(config: PerformanceConfig = {}): { report
   }, [reportMetric])
 
   return {
-    reportCustomMetric: useCallback((name: string, value: number, rating?: 'good' | 'needs-improvement' | 'poor') => {
-      const customMetric: Metric = {
-        name: `custom-${name}`,
-        value,
-        rating: rating || (value < 100 ? 'good' : value < 300 ? 'needs-improvement' : 'poor'),
-        delta: 0,
-        id: Math.random().toString(36).substr(2, 9),
-        entries: [],
-        navigationType: 'navigate',
-      }
-      reportMetric(customMetric)
-    }, [reportMetric]),
+    reportCustomMetric: useCallback(
+      (name: string, value: number, rating?: 'good' | 'needs-improvement' | 'poor') => {
+        const customMetric: Metric = {
+          name: `custom-${name}`,
+          value,
+          rating: rating || (value < 100 ? 'good' : value < 300 ? 'needs-improvement' : 'poor'),
+          delta: 0,
+          id: Math.random().toString(36).substr(2, 9),
+          entries: [],
+          navigationType: 'navigate',
+        }
+        reportMetric(customMetric)
+      },
+      [reportMetric]
+    ),
   }
 }
 
@@ -140,14 +153,20 @@ export function usePagePerformanceTracking(pageName: string): {
   const startTime = useRef<number>(Date.now())
   const { reportCustomMetric } = usePerformanceTracking()
 
-  const trackInteraction = useCallback((interactionName: string) => {
-    const interactionTime = Date.now() - startTime.current
-    reportCustomMetric(`${pageName}-${interactionName}`, interactionTime)
-  }, [pageName, reportCustomMetric])
+  const trackInteraction = useCallback(
+    (interactionName: string) => {
+      const interactionTime = Date.now() - startTime.current
+      reportCustomMetric(`${pageName}-${interactionName}`, interactionTime)
+    },
+    [pageName, reportCustomMetric]
+  )
 
-  const trackResourceLoad = useCallback((resourceName: string, loadTime: number) => {
-    reportCustomMetric(`${pageName}-resource-${resourceName}`, loadTime)
-  }, [pageName, reportCustomMetric])
+  const trackResourceLoad = useCallback(
+    (resourceName: string, loadTime: number) => {
+      reportCustomMetric(`${pageName}-resource-${resourceName}`, loadTime)
+    },
+    [pageName, reportCustomMetric]
+  )
 
   useEffect(() => {
     // Track page visibility changes
@@ -164,7 +183,7 @@ export function usePagePerformanceTracking(pageName: string): {
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      
+
       // Report final session duration
       const finalDuration = Date.now() - startTime.current
       reportCustomMetric(`${pageName}-session-duration`, finalDuration)
@@ -174,10 +193,13 @@ export function usePagePerformanceTracking(pageName: string): {
   return {
     trackInteraction,
     trackResourceLoad,
-    markMilestone: useCallback((milestoneName: string) => {
-      const milestoneTime = Date.now() - startTime.current
-      reportCustomMetric(`${pageName}-milestone-${milestoneName}`, milestoneTime)
-    }, [pageName, reportCustomMetric]),
+    markMilestone: useCallback(
+      (milestoneName: string) => {
+        const milestoneTime = Date.now() - startTime.current
+        reportCustomMetric(`${pageName}-milestone-${milestoneName}`, milestoneTime)
+      },
+      [pageName, reportCustomMetric]
+    ),
   }
 }
 
@@ -252,12 +274,11 @@ export function usePerformanceDashboard(): {
         }
       }
 
-      getCLS(collectMetric)
-      getFCP(collectMetric)
-      getFID(collectMetric)
-      getLCP(collectMetric)
-      getTTFB(collectMetric)
-      getINP(collectMetric)
+      onCLS(collectMetric)
+      onFCP(collectMetric)
+      onLCP(collectMetric)
+      onTTFB(collectMetric)
+      onINP(collectMetric)
 
       // Timeout after 5 seconds
       setTimeout(() => resolve(metrics), 5000)
@@ -266,12 +287,16 @@ export function usePerformanceDashboard(): {
 
   const getPerformanceScore = useCallback(() => {
     const metrics = metricsRef.current
-    const scores = Object.values(metrics).map(metric => {
+    const scores = Object.values(metrics).map((metric) => {
       switch (metric.rating) {
-        case 'good': return 100
-        case 'needs-improvement': return 75
-        case 'poor': return 50
-        default: return 0
+        case 'good':
+          return 100
+        case 'needs-improvement':
+          return 75
+        case 'poor':
+          return 50
+        default:
+          return 0
       }
     })
 
