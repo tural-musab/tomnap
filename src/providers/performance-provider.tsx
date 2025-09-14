@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { performanceMonitor, usePerformanceMonitor } from '@/lib/performance'
+import { usePerformanceMonitor } from '@/lib/performance'
 
 interface PerformanceProviderProps {
   children: React.ReactNode

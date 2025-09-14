@@ -21,10 +21,24 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'TomNAP - Sosyal E-Ticaret Platformu',
+  title: {
+    default: 'TomNAP - Sosyal E-Ticaret Platformu',
+    template: '%s | TomNAP'
+  },
   description: 'Video ile alışverişin buluştuğu sosyal platform. TikTok tarzı video akışında ürünleri keşfedin, anında satın alın.',
-  keywords: 'e-ticaret, sosyal ticaret, video alışveriş, canlı yayın, TomNAP, online alışveriş, influencer marketing',
-  authors: [{ name: 'TomNAP Team' }],
+  keywords: [
+    'e-ticaret',
+    'sosyal ticaret',
+    'video alışveriş',
+    'canlı yayın',
+    'TomNAP',
+    'online alışveriş',
+    'influencer marketing',
+    'sosyal medya alışveriş',
+    'video commerce',
+    'live shopping'
+  ],
+  authors: [{ name: 'TomNAP Team', url: 'https://tomnap.com/about' }],
   creator: 'TomNAP',
   publisher: 'TomNAP',
   formatDetection: {
@@ -39,6 +53,12 @@ export const metadata: Metadata = {
       'tr-TR': '/tr',
       'en-US': '/en',
     },
+    types: {
+      'application/rss+xml': [{
+        url: '/feed.xml',
+        title: 'TomNAP RSS Feed'
+      }]
+    }
   },
   openGraph: {
     title: 'TomNAP - Sosyal E-Ticaret Platformu',
@@ -61,7 +81,13 @@ export const metadata: Metadata = {
     title: 'TomNAP - Sosyal E-Ticaret Platformu',
     description: 'Video ile alışverişin buluştuğu sosyal platform',
     creator: '@tomnap',
-    images: ['/twitter-image.png'],
+    site: '@tomnap',
+    images: [{
+      url: '/twitter-image.png',
+      width: 1200,
+      height: 630,
+      alt: 'TomNAP - Video ile Sosyal Alışveriş'
+    }],
   },
   robots: {
     index: true,
@@ -163,29 +189,120 @@ export default async function RootLayout({
         {/* PWA Service Worker Registration */}
         <RegisterSW />
         
-        {/* Structured Data */}
+        {/* Structured Data - Organization */}
         <Script
-          id="structured-data"
+          id="organization-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'TomNAP',
+              url: 'https://tomnap.com',
+              logo: 'https://tomnap.com/logo.png',
+              sameAs: [
+                'https://twitter.com/tomnap',
+                'https://instagram.com/tomnap',
+                'https://facebook.com/tomnap'
+              ],
+              contactPoint: {
+                '@type': 'ContactPoint',
+                telephone: '+90-555-000-0000',
+                contactType: 'Customer Support',
+                email: 'support@tomnap.com',
+                availableLanguage: ['Turkish', 'English']
+              },
+              address: {
+                '@type': 'PostalAddress',
+                addressCountry: 'TR',
+                addressLocality: 'Istanbul'
+              }
+            }),
+          }}
+        />
+        
+        {/* Structured Data - WebApplication */}
+        <Script
+          id="webapp-schema"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebApplication',
               name: 'TomNAP',
-              description: 'Sosyal E-Ticaret Platformu',
+              description: 'Video ile alışverişin buluştuğu sosyal e-ticaret platformu. TikTok tarzı video akışında ürünleri keşfedin, anında satın alın.',
               url: 'https://tomnap.com',
               applicationCategory: 'ShoppingApplication',
               operatingSystem: 'Any',
+              browserRequirements: 'Requires JavaScript. Chrome 70+, Firefox 65+, Safari 12+',
+              softwareVersion: '1.0.0',
               offers: {
                 '@type': 'Offer',
                 price: '0',
                 priceCurrency: 'TRY',
+                availability: 'https://schema.org/InStock'
               },
               aggregateRating: {
                 '@type': 'AggregateRating',
                 ratingValue: '4.8',
                 ratingCount: '12543',
+                bestRating: '5',
+                worstRating: '1'
               },
+              author: {
+                '@type': 'Organization',
+                name: 'TomNAP Team'
+              },
+              creator: {
+                '@type': 'Organization',
+                name: 'TomNAP'
+              },
+              featureList: [
+                'Video tabanlı ürün keşfi',
+                'Anında satın alma',
+                'Sosyal alışveriş deneyimi',
+                'Güvenli ödeme sistemi',
+                'Mobil optimize'
+              ]
+            }),
+          }}
+        />
+        
+        {/* Structured Data - WebSite with Search Action */}
+        <Script
+          id="website-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'TomNAP',
+              description: 'Sosyal E-Ticaret Platformu',
+              url: 'https://tomnap.com',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: 'https://tomnap.com/search?q={search_term_string}'
+                },
+                'query-input': 'required name=search_term_string'
+              },
+              inLanguage: 'tr-TR',
+              isAccessibleForFree: true,
+              hasPart: [
+                {
+                  '@type': 'WebPage',
+                  name: 'Video Feed',
+                  url: 'https://tomnap.com/feed',
+                  description: 'Ürünleri video formatında keşfedin'
+                },
+                {
+                  '@type': 'WebPage',
+                  name: 'Keşfet',
+                  url: 'https://tomnap.com/explore',
+                  description: 'Popüler ürünleri ve yaratıcıları keşfedin'
+                }
+              ]
             }),
           }}
         />

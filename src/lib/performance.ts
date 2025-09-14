@@ -294,7 +294,9 @@ class PerformanceMonitor {
   private getConnectionInfo(): PerformanceMetric['connection'] {
     if (typeof window === 'undefined' || !('connection' in navigator)) return undefined
 
-    const connection = (navigator as any).connection
+    const connection = (navigator as unknown as { connection?: { effectiveType?: string; downlink?: number; rtt?: number } }).connection
+    if (!connection) return undefined
+    
     return {
       effectiveType: connection.effectiveType || 'unknown',
       downlink: connection.downlink || 0,
@@ -427,7 +429,7 @@ class PerformanceMonitor {
     })
   }
 
-  public recordUserAction(action: string, details?: Record<string, any>): void {
+  public recordUserAction(action: string, details?: Record<string, unknown>): void {
     this.recordCustomMetric({
       name: `user_action_${action}`,
       value: 1,
@@ -487,7 +489,14 @@ export const performanceMonitor = new PerformanceMonitor({
 })
 
 // React Hook for performance monitoring
-export function usePerformanceMonitor() {
+export function usePerformanceMonitor(): {
+  recordMetric: (metric: CustomMetric) => void
+  startTimer: (name: string) => void
+  endTimer: (name: string) => void
+  recordPageView: () => void
+  recordUserAction: (action: string, details?: Record<string, unknown>) => void
+} {
+  return React.useMemo(() => ({
   const recordMetric = (metric: CustomMetric) => {
     performanceMonitor.recordCustomMetric(metric)
   }
@@ -504,24 +513,17 @@ export function usePerformanceMonitor() {
     performanceMonitor.recordPageView()
   }
 
-  const recordUserAction = (action: string, details?: Record<string, any>) => {
-    performanceMonitor.recordUserAction(action, details)
-  }
-
-  return {
-    recordMetric,
-    startTimer,
-    endTimer,
-    recordPageView,
-    recordUserAction
-  }
+    recordUserAction: (action: string, details?: Record<string, unknown>) => {
+      performanceMonitor.recordUserAction(action, details)
+    }
+  }), [])
 }
 
 // Higher-order component for automatic performance tracking
 export function withPerformanceTracking<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   componentName?: string
-) {
+): React.ComponentType<P> {
   const WithPerformanceTracking = (props: P) => {
     const { startTimer, endTimer } = usePerformanceMonitor()
     
