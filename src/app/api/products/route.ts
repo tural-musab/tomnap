@@ -12,7 +12,72 @@ import {
 } from '@/lib/api-validation'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET(request: NextRequest) {
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     tags:
+ *       - Products
+ *     summary: List products
+ *     description: Retrieve a paginated list of active products
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         description: Page number (0-based)
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *           default: 0
+ *       - name: limit
+ *         in: query
+ *         description: Number of items per page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *       - name: category
+ *         in: query
+ *         description: Filter by category
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: search
+ *         in: query
+ *         description: Search in product title and description
+ *         required: false
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *                 message:
+ *                   type: string
+ *                   example: Products retrieved successfully
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       429:
+ *         $ref: '#/components/responses/RateLimit'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+export async function GET(request: NextRequest): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url)
     const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'anonymous'
@@ -70,7 +135,145 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+/**
+ * @swagger
+ * /api/products:
+ *   post:
+ *     tags:
+ *       - Products
+ *     summary: Create product
+ *     description: Create a new product (requires authentication)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - price
+ *               - currency
+ *               - category
+ *               - images
+ *               - stock_quantity
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Premium Wireless Headphones
+ *                 minLength: 1
+ *                 maxLength: 200
+ *               description:
+ *                 type: string
+ *                 nullable: true
+ *                 example: High-quality wireless headphones with noise cancellation
+ *                 maxLength: 2000
+ *               price:
+ *                 type: number
+ *                 format: float
+ *                 minimum: 0
+ *                 example: 299.99
+ *               sale_price:
+ *                 type: number
+ *                 format: float
+ *                 minimum: 0
+ *                 nullable: true
+ *                 example: 249.99
+ *               currency:
+ *                 type: string
+ *                 example: TRY
+ *                 default: TRY
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: uri
+ *                 example: ["https://example.com/product1.jpg", "https://example.com/product2.jpg"]
+ *                 minItems: 1
+ *                 maxItems: 10
+ *               category:
+ *                 type: string
+ *                 example: Electronics
+ *               subcategory:
+ *                 type: string
+ *                 nullable: true
+ *                 example: Audio
+ *               brand:
+ *                 type: string
+ *                 nullable: true
+ *                 example: TechBrand
+ *               stock_quantity:
+ *                 type: integer
+ *                 minimum: 0
+ *                 example: 50
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["wireless", "audio", "premium"]
+ *               weight:
+ *                 type: number
+ *                 format: float
+ *                 minimum: 0
+ *                 example: 0.25
+ *               dimensions:
+ *                 type: object
+ *                 properties:
+ *                   length:
+ *                     type: number
+ *                     format: float
+ *                     minimum: 0
+ *                   width:
+ *                     type: number
+ *                     format: float
+ *                     minimum: 0
+ *                   height:
+ *                     type: number
+ *                     format: float
+ *                     minimum: 0
+ *                   unit:
+ *                     type: string
+ *                     default: cm
+ *               shipping_info:
+ *                 type: object
+ *                 properties:
+ *                   free_shipping:
+ *                     type: boolean
+ *                     default: false
+ *                   shipping_cost:
+ *                     type: number
+ *                     format: float
+ *                     minimum: 0
+ *                   estimated_delivery_days:
+ *                     type: integer
+ *                     minimum: 1
+ *     responses:
+ *       201:
+ *         description: Product created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Product'
+ *                 message:
+ *                   type: string
+ *                   example: Product created successfully
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       429:
+ *         $ref: '#/components/responses/RateLimit'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+export async function POST(request: NextRequest): Promise<Response> {
   try {
     const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'anonymous'
     

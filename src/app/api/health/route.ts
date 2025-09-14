@@ -1,7 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-export async function GET(request: NextRequest) {
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     tags:
+ *       - Health Check
+ *     summary: Health check endpoint
+ *     description: Returns the health status of the application and its dependencies
+ *     responses:
+ *       200:
+ *         description: Application is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthCheck'
+ *       503:
+ *         description: Application is unhealthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/HealthCheck'
+ *                 - type: object
+ *                   properties:
+ *                     error:
+ *                       type: string
+ *                       example: Database connection failed
+ */
+export async function GET(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now()
   
   try {
