@@ -1,0 +1,100 @@
+name: Database Operations
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Database operation'
+        required: true
+        default: 'migrate'
+        type: choice
+        options:
+          - migrate
+          - reset
+          - seed
+          - backup
+
+jobs:
+  database-migrate:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.operation == 'migrate'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Run migrations
+        run: |
+          supabase db push --db-url "${{ secrets.DATABASE_URL }}"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Verify migration
+        run: |
+          supabase db diff --schema public
+        continue-on-error: true
+
+  database-backup:
+    name: Database Backup
+    runs-on: ubuntu-latest
+    if: github.event.inputs.operation == 'backup'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+
+      - name: Create backup
+        run: |
+          supabase db dump --db-url "${{ secrets.DATABASE_URL }}" > backup-$(date +%Y%m%d-%H%M%S).sql
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Upload backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ github.run_number }}
+          path: backup-*.sql
+          retention-days: 30
+
+  database-seed:
+    name: Database Seed
+    runs-on: ubuntu-latest
+    if: github.event.inputs.operation == 'seed'
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '9'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run seed script
+        run: |
+          curl -X POST "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}/rest/v1/rpc/seed_data" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json"
+        continue-on-error: true
