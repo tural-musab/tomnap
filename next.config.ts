@@ -2,10 +2,12 @@ import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 // Import security configuration
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { securityHeaders } = require('./next-security.config.js')
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: 'standalone', // Enable standalone output for Docker
   serverExternalPackages: ['lightningcss', 'lightningcss-darwin-arm64', '@tailwindcss/node'],
   images: {
     remotePatterns: [
@@ -39,9 +41,12 @@ const nextConfig: NextConfig = {
     webpackBuildWorker: true,
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? {
+            exclude: ['error', 'warn'],
+          }
+        : false,
   },
   poweredByHeader: false,
   compress: true,
@@ -63,20 +68,20 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate'
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
           },
           {
             key: 'X-API-Version',
-            value: '1.0.0'
+            value: '1.0.0',
           },
           {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, PUT, DELETE, OPTIONS'
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Requested-With'
-          }
+            value: 'Content-Type, Authorization, X-Requested-With',
+          },
         ],
       },
       {
@@ -85,8 +90,8 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable'
-          }
+            value: 'public, max-age=31536000, immutable',
+          },
         ],
       },
       {
@@ -103,8 +108,8 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Service-Worker-Allowed',
-            value: '/'
-          }
+            value: '/',
+          },
         ],
       },
       {

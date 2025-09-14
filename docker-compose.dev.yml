@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  tomnap-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - '3000:3000'
+      - '9229:9229' # Debug port
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - WATCHPACK_POLLING=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: pnpm dev
+    restart: unless-stopped
+    depends_on:
+      - postgres-dev
+      - redis-dev
+    networks:
+      - tomnap-dev-network
+
+  postgres-dev:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: tomnap_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - tomnap-dev-network
+
+  redis-dev:
+    image: redis:7-alpine
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_dev_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - tomnap-dev-network
+
+  # Supabase local development stack
+  supabase-studio:
+    image: supabase/studio:20231020-ce42139
+    ports:
+      - '3001:3000'
+    environment:
+      SUPABASE_URL: http://kong:8000
+      STUDIO_PG_META_URL: http://meta:8080
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+    depends_on:
+      - postgres-dev
+    networks:
+      - tomnap-dev-network
+    profiles:
+      - supabase
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+
+networks:
+  tomnap-dev-network:
+    driver: bridge

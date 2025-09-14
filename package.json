@@ -18,7 +18,15 @@
     "shadcn-add-all": "shadcn-ui@latest add dialog button card tabs avatar dropdown-menu toast sheet drawer badge skeleton input textarea select checkbox",
     "prepare": "husky",
     "generate-icons": "node scripts/generate-icons.js",
-    "pwa-assets": "pnpm generate-icons"
+    "pwa-assets": "pnpm generate-icons",
+    "docker:build": "./scripts/docker-build.sh production",
+    "docker:build:dev": "./scripts/docker-build.sh development",
+    "docker:test": "./scripts/docker-build.sh test",
+    "docker:up": "docker-compose up",
+    "docker:up:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:down": "docker-compose down",
+    "docker:health": "./scripts/docker-health.sh",
+    "docker:logs": "./scripts/docker-health.sh tomnap-tomnap-1 30 logs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

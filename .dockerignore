@@ -1,0 +1,61 @@
+# Dependencies
+node_modules
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+.env.example
+
+# Testing
+coverage
+.vitest
+
+# Build outputs
+.next/
+out/
+
+# Misc
+.DS_Store
+*.tsbuildinfo
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+README.md
+
+# CI/CD
+.github
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Logs
+logs
+*.log
+
+# Cache directories
+.cache
+.turbo
+
+# Sentry
+.sentryclirc
+
+# Security
+security-audit-report.json
+
+# Development
+scripts/
+vitest.config.ts
+vitest.setup.ts
