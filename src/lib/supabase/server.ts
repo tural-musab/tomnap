@@ -1,8 +1,9 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { Database } from '@/types/database.types'
+import type { Database } from '@/types/database.types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
-export async function createClient() {
+export async function createClient(): Promise<SupabaseClient<Database>> {
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
@@ -22,4 +23,27 @@ export async function createClient() {
       },
     }
   )
+}
+
+export async function getUser() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
+}
+
+export async function getSession() {
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  return session
+}
+
+export async function getProfile(userId: string) {
+  const supabase = await createClient()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single()
+  
+  return profile
 }

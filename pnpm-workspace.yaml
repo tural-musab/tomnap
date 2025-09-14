@@ -1,0 +1,9 @@
+ignoredBuiltDependencies:
+  - '@sentry/cli'
+  - '@tailwindcss/oxide'
+  - esbuild
+  - sharp
+  - unrs-resolver
+
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'

@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import type { Database } from '@/types/database.types'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 interface CartItem {
   id: string
@@ -73,7 +75,7 @@ export const useCartStore = create<CartStore>()(
             product_id: product.id,
             title: product.title,
             price: product.price,
-            sale_price: product.sale_price,
+            sale_price: product.sale_price ?? undefined,
             image: product.images?.[0]?.url || '',
             quantity,
             vendor_id: product.vendor_id,
@@ -88,7 +90,7 @@ export const useCartStore = create<CartStore>()(
         }
 
         // Sync with database if user is logged in
-        const supabase = createClient()
+        const supabase = createClient() as SupabaseClient<Database>
         const {
           data: { user },
         } = await supabase.auth.getUser()
@@ -151,14 +153,16 @@ export const useCartStore = create<CartStore>()(
 
         // Insert new cart items
         if (items.length > 0) {
-          const cartItems = items.map((item) => ({
-            user_id: user.id,
-            product_id: item.product_id,
-            quantity: item.quantity,
-            variant: item.variant,
-          }))
+          const cartItems: Database['public']['Tables']['cart_items']['Insert'][] = items.map(
+            (item) => ({
+              user_id: user.id,
+              product_id: item.product_id,
+              quantity: item.quantity,
+              variant: (item.variant ?? null) as Database['public']['Tables']['cart_items']['Insert']['variant'],
+            })
+          )
 
-          await supabase.from('cart_items').insert(cartItems)
+          await supabase.from('cart_items').insert(cartItems as Database['public']['Tables']['cart_items']['Insert'][])
         }
       },
     }),

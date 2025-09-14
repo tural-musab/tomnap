@@ -21,3 +21,11 @@ export function formatNumber(num: number): string {
   }
   return num.toString()
 }
+
+export function sanitizeInput(input: string): string {
+  return input
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/ on[a-z]+="[^"]*"/gi, '')
+    .replace(/ on[a-z]+='[^']*'/gi, '')
+    .replace(/javascript:/gi, '')
+}

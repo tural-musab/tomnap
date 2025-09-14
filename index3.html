@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopFlow - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #13131a;
+            --bg-tertiary: #1a1a24;
+            --surface: #1f1f2e;
+            --surface-hover: #252538;
+            
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b8;
+            --text-tertiary: #6b6b80;
+            
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --gradient-dark: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Neon Glow */
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5),
+                        0 0 40px rgba(139, 92, 246, 0.3),
+                        0 0 60px rgba(139, 92, 246, 0.1);
+        }
+
+        /* User Type Selector */
+        .user-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            padding: 5px;
+            background: var(--surface);
+            border-radius: 50px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .user-type-btn {
+            padding: 10px 20px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .user-type-btn.active {
+            background: var(--gradient-primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Dashboard Container */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .user-details h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .user-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--gradient-accent);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            padding: 25px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stat-change.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            padding: 25px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chart-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-option {
+            padding: 6px 12px;
+            background: var(--surface);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chart-option.active {
+            background: var(--accent-purple);
+            color: white;
+        }
+
+        .chart-placeholder {
+            height: 250px;
+            background: var(--surface);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated Bars */
+        .bars-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            height: 200px;
+            padding: 20px;
+        }
+
+        .bar {
+            flex: 1;
+            background: var(--gradient-primary);
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            animation: growBar 1s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes growBar {
+            to {
+                opacity: 1;
+                transform: scaleY(1);
+            }
+        }
+
+        .bar:nth-child(1) { height: 80%; animation-delay: 0.1s; }
+        .bar:nth-child(2) { height: 60%; animation-delay: 0.2s; }
+        .bar:nth-child(3) { height: 90%; animation-delay: 0.3s; }
+        .bar:nth-child(4) { height: 70%; animation-delay: 0.4s; }
+        .bar:nth-child(5) { height: 85%; animation-delay: 0.5s; }
+
+        /* Activity Feed */
+        .activity-section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .view-all {
+            color: var(--accent-purple);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .view-all:hover {
+            transform: translateX(5px);
+        }
+
+        .activity-list {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .activity-item:hover {
+            background: var(--surface);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .activity-value {
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .action-card {
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-purple);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .action-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .action-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .action-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 20px;
+            overflow-x: auto;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        td {
+            padding: 15px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        tr:hover {
+            background: var(--surface);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+        }
+
+        .status-badge.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-yellow);
+        }
+
+        .status-badge.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+        }
+
+        .status-badge.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+        }
+
+        /* Progress Bars */
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .progress-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--surface);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            animation: fillProgress 1s ease forwards;
+        }
+
+        @keyframes fillProgress {
+            from { width: 0; }
+        }
+
+        /* Live Indicator */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 20px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notification-bell .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .user-selector {
+                top: 10px;
+                right: 10px;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .user-type-btn {
+                font-size: 12px;
+                padding: 8px 15px;
+            }
+        }
+
+        /* Animations */
+        .slide-up {
+            animation: slideUp 0.5s ease forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Special Elements for Different User Types */
+        .influencer-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            padding: 15px;
+            background: var(--surface);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-pink);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 5px;
+        }
+
+        /* Vendor Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .product-card {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 150px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .product-price {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .product-stock {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 5px;
+        }
+
+        /* Admin Controls */
+        .admin-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .control-card {
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .control-title {
+            font-weight: 600;
+        }
+
+        .control-switch {
+            width: 50px;
+            height: 25px;
+            background: var(--surface);
+            border-radius: 25px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .control-switch.active {
+            background: var(--accent-green);
+        }
+
+        .control-switch::after {
+            content: '';
+            position: absolute;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+        }
+
+        .control-switch.active::after {
+            transform: translateX(25px);
+        }
+    </style>
+</head>
+<body>
+    <!-- User Type Selector -->
+    <div class="user-selector">
+        <button class="user-type-btn active" onclick="switchDashboard('customer')">Müşteri</button>
+        <button class="user-type-btn" onclick="switchDashboard('vendor')">Satıcı</button>
+        <button class="user-type-btn" onclick="switchDashboard('influencer')">Influencer</button>
+        <button class="user-type-btn" onclick="switchDashboard('admin')">Yönetici</button>
+    </div>
+
+    <!-- Customer Dashboard -->
+    <div class="dashboard active" id="customer-dashboard">
+        <div class="header glass">
+            <div class="user-info">
+                <div class="avatar">👤</div>
+                <div class="user-details">
+                    <h1>Merhaba, Ahmet!</h1>
+                    <span class="user-badge">Premium Müşteri ⭐</span>
+                </div>
+            </div>
+            <div class="notification-bell">
+                <span style="font-size: 24px;">🔔</span>
+                <span class="badge">3</span>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(236, 72, 153, 0.1); color: var(--accent-pink);">🛍️</div>
+                    <span class="stat-change">+12%</span>
+                </div>
+                <div class="stat-value">156</div>
+                <div class="stat-label">Toplam Sipariş</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple);">💰</div>
+                    <span class="stat-change">+8%</span>
+                </div>
+                <div class="stat-value">₺24,750</div>
+                <div class="stat-label">Toplam Harcama</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-green);">🎁</div>
+                    <span class="stat-change">+5</span>
+                </div>
+                <div class="stat-value">₺2,450</div>
+                <div class="stat-label">Kazanılan İndirim</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--accent-yellow);">⭐</div>
+                    <span class="stat-change">Yeni!</span>
+                </div>
+                <div class="stat-value">4.9</div>
+                <div class="stat-label">Ortalama Puan</div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <div class="action-card">
+                <span class="action-icon">📦</span>
+                <span class="action-label">Siparişlerim</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">❤️</span>
+                <span class="action-label">Favorilerim</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">🎬</span>
+                <span class="action-label">İzlediklerim</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">💳</span>
+                <span class="action-label">Cüzdanım</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">🎯</span>
+                <span class="action-label">Kuponlarım</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">💬</span>
+                <span class="action-label">Mesajlarım</span>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Aylık Harcama Grafiği</h3>
+                    <div class="chart-options">
+                        <button class="chart-option active">6 Ay</button>
+                        <button class="chart-option">1 Yıl</button>
+                    </div>
+                </div>
+                <div class="chart-placeholder">
+                    <div class="bars-container">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Kategori Dağılımı</h3>
+                </div>
+                <div class="influencer-metrics">
+                    <div class="metric-card">
+                        <div class="metric-value">45%</div>
+                        <div class="metric-label">Elektronik</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">30%</div>
+                        <div class="metric-label">Moda</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">15%</div>
+                        <div class="metric-label">Ev & Yaşam</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">10%</div>
+                        <div class="metric-label">Diğer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <div class="section-header">
+                <h2 class="section-title">Son Siparişlerim</h2>
+                <a href="#" class="view-all">Tümünü Gör →</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sipariş No</th>
+                            <th>Ürün</th>
+                            <th>Satıcı</th>
+                            <th>Tutar</th>
+                            <th>Durum</th>
+                            <th>Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#SF2024156</td>
+                            <td>Wireless Earbuds Pro</td>
+                            <td>TechHub</td>
+                            <td>₺999</td>
+                            <td><span class="status-badge success">Teslim Edildi</span></td>
+                            <td>15 Ara 2024</td>
+                        </tr>
+                        <tr>
+                            <td>#SF2024155</td>
+                            <td>Designer Handbag</td>
+                            <td>LuxuryBrands</td>
+                            <td>₺2,499</td>
+                            <td><span class="status-badge warning">Kargoda</span></td>
+                            <td>14 Ara 2024</td>
+                        </tr>
+                        <tr>
+                            <td>#SF2024154</td>
+                            <td>Smart Watch Ultra</td>
+                            <td>AppleStore</td>
+                            <td>₺2,999</td>
+                            <td><span class="status-badge info">Hazırlanıyor</span></td>
+                            <td>13 Ara 2024</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Dashboard -->
+    <div class="dashboard" id="vendor-dashboard">
+        <div class="header glass">
+            <div class="user-info">
+                <div class="avatar">🏪</div>
+                <div class="user-details">
+                    <h1>TechHub Store</h1>
+                    <span class="user-badge">Verified Vendor ✓</span>
+                </div>
+            </div>
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span style="font-size: 12px;">Canlı Yayında</span>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-green);">💰</div>
+                    <span class="stat-change">+28%</span>
+                </div>
+                <div class="stat-value">₺847,250</div>
+                <div class="stat-label">Bu Ay Gelir</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--accent-blue);">📦</div>
+                    <span class="stat-change">+45</span>
+                </div>
+                <div class="stat-value">1,234</div>
+                <div class="stat-label">Toplam Sipariş</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(236, 72, 153, 0.1); color: var(--accent-pink);">🛍️</div>
+                    <span class="stat-change">+12</span>
+                </div>
+                <div class="stat-value">156</div>
+                <div class="stat-label">Aktif Ürün</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--accent-yellow);">⭐</div>
+                    <span class="stat-change">+0.2</span>
+                </div>
+                <div class="stat-value">4.8</div>
+                <div class="stat-label">Mağaza Puanı</div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <div class="action-card">
+                <span class="action-icon">➕</span>
+                <span class="action-label">Ürün Ekle</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">📹</span>
+                <span class="action-label">Canlı Yayın</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">📊</span>
+                <span class="action-label">Analitik</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">🎯</span>
+                <span class="action-label">Kampanyalar</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">📦</span>
+                <span class="action-label">Stok Yönetimi</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">💬</span>
+                <span class="action-label">Müşteri Mesajları</span>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2 class="section-title">En Çok Satan Ürünler</h2>
+            <a href="#" class="view-all">Tüm Ürünler →</a>
+        </div>
+        <div class="product-grid">
+            <div class="product-card">
+                <div class="product-image">🎧</div>
+                <div class="product-info">
+                    <div class="product-name">Wireless Earbuds Pro</div>
+                    <div class="product-price">₺999</div>
+                    <div class="product-stock">Stok: 45 adet</div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image">⌚</div>
+                <div class="product-info">
+                    <div class="product-name">Smart Watch Ultra</div>
+                    <div class="product-price">₺2,999</div>
+                    <div class="product-stock">Stok: 12 adet</div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 30%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image">💻</div>
+                <div class="product-info">
+                    <div class="product-name">Gaming Laptop RTX</div>
+                    <div class="product-price">₺74,999</div>
+                    <div class="product-stock">Stok: 5 adet</div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 20%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image">📱</div>
+                <div class="product-info">
+                    <div class="product-name">Smartphone Pro Max</div>
+                    <div class="product-price">₺34,999</div>
+                    <div class="product-stock">Stok: 8 adet</div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 45%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Satış Performansı</h3>
+                    <div class="chart-options">
+                        <button class="chart-option active">Bu Hafta</button>
+                        <button class="chart-option">Bu Ay</button>
+                    </div>
+                </div>
+                <div class="chart-placeholder">
+                    <div class="bars-container">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Dönüşüm Oranları</h3>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">Görüntüleme → Sepet</span>
+                        <span class="progress-value">24%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 24%;"></div>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">Sepet → Satın Alma</span>
+                        <span class="progress-value">68%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 68%;"></div>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">Video → Satış</span>
+                        <span class="progress-value">12%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 12%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Influencer Dashboard -->
+    <div class="dashboard" id="influencer-dashboard">
+        <div class="header glass">
+            <div class="user-info">
+                <div class="avatar">🌟</div>
+                <div class="user-details">
+                    <h1>@fashionguru</h1>
+                    <span class="user-badge">Top Influencer 🏆</span>
+                </div>
+            </div>
+            <div class="notification-bell">
+                <span style="font-size: 24px;">🔔</span>
+                <span class="badge">12</span>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(236, 72, 153, 0.1); color: var(--accent-pink);">👥</div>
+                    <span class="stat-change">+5.2K</span>
+                </div>
+                <div class="stat-value">125K</div>
+                <div class="stat-label">Takipçi</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple);">💰</div>
+                    <span class="stat-change">+32%</span>
+                </div>
+                <div class="stat-value">₺45,780</div>
+                <div class="stat-label">Bu Ay Kazanç</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-green);">🎬</div>
+                    <span class="stat-change">+2.3M</span>
+                </div>
+                <div class="stat-value">8.7M</div>
+                <div class="stat-label">Video İzlenme</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--accent-blue);">🛍️</div>
+                    <span class="stat-change">+156</span>
+                </div>
+                <div class="stat-value">3,450</div>
+                <div class="stat-label">Satış Dönüşümü</div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <div class="action-card">
+                <span class="action-icon">📹</span>
+                <span class="action-label">Canlı Yayın</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">🎬</span>
+                <span class="action-label">Video Yükle</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">📸</span>
+                <span class="action-label">Story Paylaş</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">🤝</span>
+                <span class="action-label">İş Birlikleri</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">📊</span>
+                <span class="action-label">İstatistikler</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">💳</span>
+                <span class="action-label">Ödemeler</span>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2 class="section-title">Engagement Metrikleri</h2>
+        </div>
+        <div class="influencer-metrics">
+            <div class="metric-card">
+                <div class="metric-value">24.5%</div>
+                <div class="metric-label">Engagement Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">12.3%</div>
+                <div class="metric-label">Click Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">8.7%</div>
+                <div class="metric-label">Conversion Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">45s</div>
+                <div class="metric-label">Avg. Watch Time</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Takipçi Büyümesi</h3>
+                    <div class="chart-options">
+                        <button class="chart-option active">30 Gün</button>
+                        <button class="chart-option">90 Gün</button>
+                    </div>
+                </div>
+                <div class="chart-placeholder">
+                    <div class="bars-container">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">İçerik Performansı</h3>
+                </div>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: rgba(236, 72, 153, 0.1);">📹</div>
+                        <div class="activity-details">
+                            <div class="activity-title">Summer Fashion Haul</div>
+                            <div class="activity-time">2.3M görüntüleme • 156K beğeni</div>
+                        </div>
+                        <div class="activity-value">₺12,450</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: rgba(139, 92, 246, 0.1);">🎬</div>
+                        <div class="activity-details">
+                            <div class="activity-title">Tech Review: Earbuds Pro</div>
+                            <div class="activity-time">1.8M görüntüleme • 98K beğeni</div>
+                        </div>
+                        <div class="activity-value">₺8,900</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: rgba(16, 185, 129, 0.1);">📸</div>
+                        <div class="activity-details">
+                            <div class="activity-title">Makeup Tutorial Story</div>
+                            <div class="activity-time">450K görüntüleme • 45K beğeni</div>
+                        </div>
+                        <div class="activity-value">₺3,200</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2 class="section-title">Aktif İş Birlikleri</h2>
+            <a href="#" class="view-all">Tümünü Gör →</a>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Marka</th>
+                        <th>Kampanya</th>
+                        <th>Durum</th>
+                        <th>Komisyon</th>
+                        <th>Dönüşüm</th>
+                        <th>Kazanç</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>NikeStore</td>
+                        <td>Summer Collection 2024</td>
+                        <td><span class="status-badge success">Aktif</span></td>
+                        <td>25%</td>
+                        <td>234 satış</td>
+                        <td>₺18,750</td>
+                    </tr>
+                    <tr>
+                        <td>TechHub</td>
+                        <td>New Tech Launch</td>
+                        <td><span class="status-badge success">Aktif</span></td>
+                        <td>20%</td>
+                        <td>156 satış</td>
+                        <td>₺12,450</td>
+                    </tr>
+                    <tr>
+                        <td>BeautyPro</td>
+                        <td>Skincare Routine</td>
+                        <td><span class="status-badge warning">Beklemede</span></td>
+                        <td>30%</td>
+                        <td>45 satış</td>
+                        <td>₺5,670</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="dashboard" id="admin-dashboard">
+        <div class="header glass">
+            <div class="user-info">
+                <div class="avatar">⚙️</div>
+                <div class="user-details">
+                    <h1>Platform Yönetimi</h1>
+                    <span class="user-badge">Super Admin 🛡️</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div class="live-indicator">
+                    <span class="live-dot"></span>
+                    <span style="font-size: 12px;">234 Aktif Kullanıcı</span>
+                </div>
+                <div class="notification-bell">
+                    <span style="font-size: 24px;">🔔</span>
+                    <span class="badge">8</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-purple);">👥</div>
+                    <span class="stat-change">+12.5K</span>
+                </div>
+                <div class="stat-value">458K</div>
+                <div class="stat-label">Toplam Kullanıcı</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-green);">💰</div>
+                    <span class="stat-change">+45%</span>
+                </div>
+                <div class="stat-value">₺12.4M</div>
+                <div class="stat-label">Platform GMV</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(236, 72, 153, 0.1); color: var(--accent-pink);">🏪</div>
+                    <span class="stat-change">+234</span>
+                </div>
+                <div class="stat-value">8,456</div>
+                <div class="stat-label">Aktif Satıcı</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--accent-yellow);">📦</div>
+                    <span class="stat-change">+3.2K</span>
+                </div>
+                <div class="stat-value">45.6K</div>
+                <div class="stat-label">Günlük İşlem</div>
+            </div>
+        </div>
+
+        <div class="admin-controls">
+            <div class="control-card">
+                <div class="control-header">
+                    <span class="control-title">Platform Durumu</span>
+                    <div class="control-switch active" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div style="margin-top: 10px; font-size: 12px; color: var(--text-tertiary);">
+                    Platform şu anda aktif ve çalışıyor
+                </div>
+            </div>
+            <div class="control-card">
+                <div class="control-header">
+                    <span class="control-title">Bakım Modu</span>
+                    <div class="control-switch" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div style="margin-top: 10px; font-size: 12px; color: var(--text-tertiary);">
+                    Bakım modu kapalı
+                </div>
+            </div>
+            <div class="control-card">
+                <div class="control-header">
+                    <span class="control-title">Yeni Kayıtlar</span>
+                    <div class="control-switch active" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div style="margin-top: 10px; font-size: 12px; color: var(--text-tertiary);">
+                    Yeni kullanıcı kayıtları açık
+                </div>
+            </div>
+            <div class="control-card">
+                <div class="control-header">
+                    <span class="control-title">Canlı Yayınlar</span>
+                    <div class="control-switch active" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div style="margin-top: 10px; font-size: 12px; color: var(--text-tertiary);">
+                    Canlı yayın özelliği aktif
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <div class="action-card">
+                <span class="action-icon">👤</span>
+                <span class="action-label">Kullanıcı Yönetimi</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">🏪</span>
+                <span class="action-label">Satıcı Onayları</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">📊</span>
+                <span class="action-label">Platform Analitik</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">💳</span>
+                <span class="action-label">Ödeme Sistemleri</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">🛡️</span>
+                <span class="action-label">Güvenlik</span>
+            </div>
+            <div class="action-card">
+                <span class="action-icon">📢</span>
+                <span class="action-label">Duyurular</span>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Platform Performansı</h3>
+                    <div class="chart-options">
+                        <button class="chart-option active">Gerçek Zamanlı</button>
+                        <button class="chart-option">24 Saat</button>
+                    </div>
+                </div>
+                <div class="chart-placeholder">
+                    <div class="bars-container">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Sistem Metrikleri</h3>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">CPU Kullanımı</span>
+                        <span class="progress-value">45%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%; background: var(--gradient-success);"></div>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">Bellek Kullanımı</span>
+                        <span class="progress-value">62%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 62%; background: var(--gradient-warning);"></div>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">Disk Kullanımı</span>
+                        <span class="progress-value">78%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 78%; background: linear-gradient(135deg, #ff6b6b 0%, #ff0000 100%);"></div>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">API Response Time</span>
+                        <span class="progress-value">124ms</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 95%; background: var(--gradient-success);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h2 class="section-title">Son Sistem Olayları</h2>
+            <a href="#" class="view-all">Tüm Loglar →</a>
+        </div>
+        <div class="activity-list">
+            <div class="activity-item">
+                <div class="activity-icon" style="background: rgba(16, 185, 129, 0.1);">✓</div>
+                <div class="activity-details">
+                    <div class="activity-title">Yeni satıcı onaylandı: FashionWorld</div>
+                    <div class="activity-time">2 dakika önce</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: rgba(245, 158, 11, 0.1);">⚠️</div>
+                <div class="activity-details">
+                    <div class="activity-title">Yüksek trafik tespit edildi - Otomatik ölçekleme başlatıldı</div>
+                    <div class="activity-time">15 dakika önce</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: rgba(239, 68, 68, 0.1);">🛡️</div>
+                <div class="activity-details">
+                    <div class="activity-title">Şüpheli giriş denemesi engellendi - IP: 192.168.1.1</div>
+                    <div class="activity-time">1 saat önce</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: rgba(59, 130, 246, 0.1);">📊</div>
+                <div class="activity-details">
+                    <div class="activity-title">Günlük yedekleme tamamlandı</div>
+                    <div class="activity-time">3 saat önce</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header" style="margin-top: 30px;">
+            <h2 class="section-title">Bekleyen İşlemler</h2>
+            <a href="#" class="view-all">Tümünü Gör →</a>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tip</th>
+                        <th>Kullanıcı/Satıcı</th>
+                        <th>İşlem</th>
+                        <th>Durum</th>
+                        <th>Tarih</th>
+                        <th>Aksiyon</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Satıcı Başvuru</td>
+                        <td>ElectroStore</td>
+                        <td>Yeni satıcı kaydı</td>
+                        <td><span class="status-badge warning">Beklemede</span></td>
+                        <td>10 dk önce</td>
+                        <td>
+                            <button style="background: var(--accent-green); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Onayla</button>
+                            <button style="background: var(--accent-red); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-left: 5px;">Reddet</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Ürün Onayı</td>
+                        <td>TechHub</td>
+                        <td>Gaming Laptop RTX 4090</td>
+                        <td><span class="status-badge warning">İnceleniyor</span></td>
+                        <td>25 dk önce</td>
+                        <td>
+                            <button style="background: var(--accent-blue); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">İncele</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Şikayet</td>
+                        <td>@user1234</td>
+                        <td>Sahte ürün bildirimi</td>
+                        <td><span class="status-badge danger">Acil</span></td>
+                        <td>1 saat önce</td>
+                        <td>
+                            <button style="background: var(--accent-purple); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Detay</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="fab">
+        <span>+</span>
+    </div>
+
+    <script>
+        // Switch between dashboards
+        function switchDashboard(type) {
+            // Hide all dashboards
+            document.querySelectorAll('.dashboard').forEach(dash => {
+                dash.classList.remove('active');
+            });
+            
+            // Show selected dashboard
+            document.getElementById(`${type}-dashboard`).classList.add('active');
+            
+            // Update button states
+            document.querySelectorAll('.user-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Reset animations
+            resetAnimations();
+        }
+
+        // Toggle switch control
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+
+        // Reset animations when switching dashboards
+        function resetAnimations() {
+            // Reset progress bars
+            document.querySelectorAll('.progress-fill').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+            
+            // Reset stat cards
+            document.querySelectorAll('.stat-card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            // Update random stats
+            const statValues = document.querySelectorAll('.stat-value');
+            if (statValues.length > 0) {
+                const randomStat = statValues[Math.floor(Math.random() * statValues.length)];
+                const currentValue = randomStat.textContent;
+                
+                // Animate value change
+                randomStat.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    randomStat.style.transform = 'scale(1)';
+                }, 300);
+            }
+            
+            // Update live indicators
+            document.querySelectorAll('.live-dot').forEach(dot => {
+                dot.style.animation = 'none';
+                setTimeout(() => {
+                    dot.style.animation = 'pulse 1.5s infinite';
+                }, 10);
+            });
+        }, 5000);
+
+        // Initialize tooltips and interactions
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add hover effects to cards
+            document.querySelectorAll('.stat-card, .action-card, .product-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // FAB click handler
+            document.querySelector('.fab').addEventListener('click', () => {
+                alert('Hızlı işlem menüsü açılacak!');
+            });
+            
+            // Initial animation
+            resetAnimations();
+        });
+
+        // Simulate chart updates
+        setInterval(() => {
+            document.querySelectorAll('.bar').forEach((bar, index) => {
+                const heights = [80, 60, 90, 70, 85];
+                const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+                bar.style.height = `${randomHeight}%`;
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

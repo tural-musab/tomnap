@@ -1,23 +1,27 @@
-import { useEffect, useState } from 'react'
+'use client'
 
-interface UserState {
-  id: string
-  username: string
-}
+import { useEffect } from 'react'
+import { useUserStore } from '@/stores/user-store'
 
 export function useUser() {
-  const [user, setUser] = useState<UserState | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, profile, isLoading } = useUserStore()
+
+  return {
+    user,
+    profile,
+    isLoading,
+    isAuthenticated: !!user,
+  }
+}
+
+export function useRequireAuth(redirectTo = '/login') {
+  const { user, isLoading } = useUserStore()
 
   useEffect(() => {
-    setLoading(true)
-    // placeholder user fetch
-    const t = setTimeout(() => {
-      setUser(null)
-      setLoading(false)
-    }, 0)
-    return () => clearTimeout(t)
-  }, [])
+    if (!isLoading && !user) {
+      window.location.href = redirectTo
+    }
+  }, [user, isLoading, redirectTo])
 
-  return { user, loading }
+  return { user, isLoading }
 }

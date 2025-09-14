@@ -110,6 +110,9 @@ importers:
       vaul:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.1.9(@types/react@19.1.13))(@types/react@19.1.13)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      web-vitals:
+        specifier: ^5.1.0
+        version: 5.1.0
       zod:
         specifier: ^4.1.7
         version: 4.1.8
@@ -5604,6 +5607,9 @@ packages:
 
   web-tree-sitter@0.24.5:
     resolution: {integrity: sha512-+J/2VSHN8J47gQUAvF8KDadrfz6uFYVjxoxbKWDoXVsH2u7yLdarCnIURnrMA6uSRkgX3SdmqM5BOoQjPdSh5w==}
+
+  web-vitals@5.1.0:
+    resolution: {integrity: sha512-ArI3kx5jI0atlTtmV0fWU3fjpLmq/nD3Zr1iFFlJLaqa5wLBkUSzINwBPySCX/8jRyjlmy1Volw1kz1g9XE4Jg==}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -11927,6 +11933,8 @@ snapshots:
 
   web-tree-sitter@0.24.5:
     optional: true
+
+  web-vitals@5.1.0: {}
 
   webidl-conversions@3.0.1: {}
 

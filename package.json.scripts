@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint",
+    "format": "prettier --write .",
+    "type-check": "tsc --noEmit",
+    "test:auth": "pnpm dev & sleep 5 && open http://localhost:3000/login",
+    "db:push": "npx supabase db push",
+    "db:reset": "npx supabase db reset",
+    "shadcn-init": "shadcn-ui@latest init -y",
+    "shadcn-add": "shadcn-ui@latest add",
+    "shadcn-add-all": "shadcn-ui@latest add dialog button card tabs avatar dropdown-menu toast sheet drawer badge skeleton input textarea select checkbox",
+    "prepare": "pnpm dlx husky"
+  }
+}

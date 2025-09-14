@@ -1,245 +1,284 @@
-# 🛍️ TomNAP - Sosyal E-Ticaret Platformu
+# TomNAP - Sosyal E-Ticaret Platformu
 
 <div align="center">
-  <img src="public/logo.png" alt="TomNAP Logo" width="200" />
+  <img src="logo/logo.svg" alt="TomNAP Logo" width="120" height="120">
   
-  [![Next.js](https://img.shields.io/badge/Next.js-15.5-black?logo=next.js)](https://nextjs.org/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
-  [![Supabase](https://img.shields.io/badge/Supabase-Auth-3ECF8E?logo=supabase)](https://supabase.com/)
+  ### 🛍️ Video İzle, Anında Satın Al
+  
+  [![Next.js](https://img.shields.io/badge/Next.js-15.5-black)](https://nextjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-38B2AC)](https://tailwindcss.com/)
+  [![Supabase](https://img.shields.io/badge/Supabase-2.0-green)](https://supabase.com/)
+  [![PWA](https://img.shields.io/badge/PWA-Ready-orange)](https://web.dev/progressive-web-apps/)
 </div>
 
-## 📌 Proje Hakkında
+## 📋 İçindekiler
 
-TomNAP, TikTok tarzı video akışı ile e-ticareti birleştiren yenilikçi bir sosyal ticaret platformudur. Kullanıcılar video izlerken aynı anda ürünleri keşfedebilir ve anında satın alabilir.
-
-## 🧭 Genel Değerlendirme
-
-- Next.js 15 App Router ile modüler route grupları kuruldu: `(auth)`, `(main)`, `api`.
-- UI katmanı shadcn/ui + Tailwind v4 ile yapılandırıldı; TomNAP teması `globals.css` üzerinden token tabanlı.
-- Global durum için Zustand, server state için React Query altyapısı hazır.
-- Supabase client/server yardımcıları eklendi; auth ve veri erişimi için temel iskelet mevcut.
-- Husky + commitlint + lint-staged ile commit kalite kontrol hattı hazır.
+- [Özellikler](#-özellikler)
+- [Teknolojiler](#-teknolojiler)
+- [Kurulum](#-kurulum)
+- [PWA Kurulumu](#-pwa-kurulumu)
+- [Geliştirme](#-geliştirme)
+- [Performans Optimizasyonları](#-performans-optimizasyonları)
+- [Deployment](#-deployment)
+- [Scripts](#-scripts)
+- [Katkıda Bulunma](#-katkıda-bulunma)
 
 ## ✨ Özellikler
 
-- 🎥 **Video Commerce**: Dikey video akışında ürün keşfi
-- 🛒 **Tek Tıkla Alışveriş**: Video izlerken sepete ekleme
-- 📱 **Mobil Öncelikli**: Tam responsive tasarım
-- 🔴 **Canlı Yayın**: Satıcılar için canlı satış imkanı
-- 👥 **Sosyal Özellikler**: Takip, beğeni, yorum
+- 🎥 **Video Commerce**: TikTok tarzı video akışında ürün keşfi
+- 🛒 **Anında Satın Alma**: Video içi satın alma özelliği
+- 📱 **PWA Desteği**: Native uygulama deneyimi
+- 🔴 **Canlı Yayın**: Influencer'lar için canlı satış imkanı
+- 👥 **Sosyal Alışveriş**: Arkadaşlarla ortak alışveriş
 - 💳 **Güvenli Ödeme**: Stripe & İyzico entegrasyonu
+- 🎁 **Ödül Sistemi**: Puan ve hediye kazanma
+- 📊 **Analitik**: Detaylı satış ve performans raporları
+- 🌙 **Dark Mode**: Göz yormayan karanlık tema
+- 🌍 **Çoklu Dil**: Türkçe ve İngilizce desteği
 
-## 🚀 Hızlı Başlangıç
+## 🚀 Teknolojiler
+
+### Frontend
+- **Next.js 15.5** - React framework with App Router
+- **TypeScript** - Type safety
+- **Tailwind CSS** - Styling
+- **Framer Motion** - Animations
+- **Zustand** - State management
+- **React Query** - Data fetching
+- **React Hook Form** - Form management
+- **Zod** - Schema validation
+
+### Backend & Services
+- **Supabase** - Database, Auth, Storage
+- **Stripe** - Payment processing
+- **İyzico** - Local payment gateway
+- **Sentry** - Error tracking
+- **Vercel** - Hosting
+
+### PWA & Performance
+- **Service Worker** - Offline support
+- **Web Manifest** - Installable app
+- **Image Optimization** - Next/Image
+- **Code Splitting** - Dynamic imports
+- **Bundle Optimization** - Tree shaking
+
+## 📦 Kurulum
 
 ### Gereksinimler
-
 - Node.js 18+
-- npm veya pnpm
-- Supabase hesabı
+- pnpm 8+
 - Git
 
-### Kurulum
+### Adımlar
 
 1. **Repoyu klonlayın**
-
 ```bash
 git clone https://github.com/yourusername/tomnap.git
 cd tomnap
 ```
 
 2. **Bağımlılıkları yükleyin**
-
 ```bash
-npm install
-# veya
 pnpm install
 ```
 
-3. **Çevre değişkenlerini ayarlayın**
-
+3. **Environment değişkenlerini ayarlayın**
 ```bash
 cp .env.local.example .env.local
-# .env.local dosyasını düzenleyip API anahtarlarınızı ekleyin
 ```
 
-4. **Supabase kurulumu**
-
-```bash
-# Supabase CLI'yi yükleyin
-npm install -g supabase
-
-# Supabase'i başlatın
-supabase init
-
-# Yeni proje başlatın veya mevcut projeye bağlanın
-supabase init
-
-# Migrasyonları uygulayın
-supabase migration up --local
-```
-
-> Not: Migration dosyaları `supabase/migrations/` altındadır. Çekirdek şema ve RLS politikaları `0001_core_schema.sql` dosyasında tanımlıdır.
-
-5. **Geliştirme sunucusunu başlatın**
-
-```bash
-npm run dev
-```
-
-Tarayıcınızda [http://localhost:3000](http://localhost:3000) adresini açın.
-
-## 📁 Proje Yapısı
-
-```
-tomnap/
-├── src/
-│   ├── app/              # Next.js App Router
-│   │   ├── (auth)/       # Auth layout grubu
-│   │   ├── (main)/       # Ana uygulama layoutu
-│   │   └── api/          # API routes
-│   ├── components/       # React componentleri
-│   │   ├── ui/           # Shadcn UI componentleri
-│   │   ├── features/     # Özellik bazlı componentler
-│   │   └── layouts/      # Layout componentleri
-│   ├── lib/              # Utility fonksiyonları
-│   │   └── supabase/     # Supabase client
-│   ├── hooks/            # Custom React hooks
-│   ├── stores/           # Zustand stores
-│   └── types/            # TypeScript type tanımları
-```
-
-## 🛠️ Teknoloji Stack
-
-### Frontend
-
-- **Next.js 15.5** - React framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Shadcn/ui** - UI component library
-- **Framer Motion** - Animasyonlar
-- **React Player** - Video oynatıcı
-
-### Backend & Database
-
-- **Supabase** - Auth & PostgreSQL
-- **Medusa.js** - E-commerce engine (yakında)
-- **Redis** - Cache (yakında)
-
-### State Management
-
-- **Zustand** - Global state
-- **React Query** - Server state
-- **SWR** - Data fetching
-
-### DevOps
-
-- **Vercel** - Hosting
-- **GitHub Actions** - CI/CD
-- **Sentry** - Error tracking (yakında)
-- **PostHog** - Analytics (yakında)
-
-## 📐 Kod Standartları
-
-Proje standartları `.cursorrules` içinde bulunur (özet):
-
-- TypeScript sıkı mod; `any` yok. Bileşenler arrow function, util fonksiyonları `function` ile.
-- Zod ile runtime doğrulama. Girdi/çıkışlar tiplenmiş.
-- Server Components varsayılan, `"use client"` yalnızca gerektiğinde.
-- Suspense, Error Boundary, RSC ile veri çekme tercih edilir.
-- Tailwind yalnız; koşullu sınıflar için `cn()` yardımcı fonksiyonu.
-- Zustand (global), React Query (server state), useState/useReducer (lokal) kullanımı.
-- Erişilebilirlik ve performans (lazy load, image optimizasyonu, caching) öncelikli.
-
-## 🎨 UI & Tema (shadcn/ui + Tailwind v4)
-
-- shadcn CLI yapılandırması: `components.json` (baseColor: `violet`, aliases: `@/components`, `@/lib/utils`).
-- Eklenen bileşenler: button, dialog, card, tabs, avatar, dropdown-menu, sheet, drawer, badge, skeleton, input, textarea, select, checkbox. (toast deprecated → proje `sonner` kullanıyor)
-- Tema ve tokenlar: `src/app/globals.css` altında `@layer base` + `@theme inline` ile `--background`, `--foreground`, `--primary`, `--border` vb. tanımlı.
-- Faydalı yardımcılar: `src/lib/utils.ts` içinde `cn`, `formatPrice`, `formatNumber`.
-- Global Toaster: `src/components/ui/sonner-toaster.tsx` ve `src/app/layout.tsx` içinde kullanıma hazır.
-
-## 🔐 Çevre Değişkenleri
-
-`/.env.local` örneği:
-
+`.env.local` dosyasını düzenleyin:
 ```env
-NEXT_PUBLIC_SUPABASE_URL="https://xxxx.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="public-anon-key"
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Stripe
+STRIPE_SECRET_KEY=your_stripe_secret_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+
+# İyzico
+IYZICO_API_KEY=your_iyzico_api_key
+IYZICO_SECRET_KEY=your_iyzico_secret_key
+
+# Sentry
+SENTRY_DSN=your_sentry_dsn
 ```
 
-Not: Gizli anahtarlar hiçbir zaman istemciye sızdırılmamalıdır.
+4. **Geliştirme sunucusunu başlatın**
+```bash
+pnpm dev
+```
 
-## 🪝 Husky & Commit Standartları
+Uygulama [http://localhost:3000](http://localhost:3000) adresinde çalışacaktır.
 
-- Husky başlatıldı, hook’lar hazır:
-  - `.husky/pre-commit`: `npx lint-staged`
-  - `.husky/commit-msg`: `npx commitlint --edit $1`
-- Commit mesajları: Conventional Commits (feat, fix, docs, style, refactor, test, chore).
+## 📱 PWA Kurulumu
 
-## 📝 Komutlar
+### Icon Oluşturma
+
+1. **Sharp paketini yükleyin** (sadece geliştirme için)
+```bash
+pnpm add -D sharp
+```
+
+2. **Logo dosyanızı hazırlayın**
+- `logo/logo.png` dosyasını oluşturun (minimum 512x512px)
+
+3. **Icon'ları generate edin**
+```bash
+pnpm generate-icons
+```
+
+Bu komut tüm PWA icon boyutlarını otomatik oluşturacaktır.
+
+### Manuel PWA Kurulumu
+
+#### Desktop (Chrome/Edge)
+1. Adres çubuğundaki install icon'una tıklayın
+2. "Install" butonuna tıklayın
+
+#### Mobile (Android)
+1. Chrome'da "Add to Home Screen" seçeneğini kullanın
+2. Otomatik PWA prompt'u bekleyin
+
+#### iOS
+1. Safari'de paylaş butonuna tıklayın
+2. "Add to Home Screen" seçeneğini seçin
+
+## 🛠️ Geliştirme
+
+### CRUD Generator
+
+Yeni bir tablo için CRUD operasyonları oluşturmak:
 
 ```bash
-# Geliştirme
-npm run dev          # Geliştirme sunucusu
+node scripts/generate-crud.js [table-name]
 
-# Build
-npm run build        # Production build
-npm run start        # Production sunucusu
-
-# Linting & Formatting
-npm run lint         # ESLint kontrolü
-npm run format       # Prettier formatla
-
-# Shadcn UI
-npm run shadcn-add   # Yeni component ekle
-
-# Testing (yakında)
-npm run test         # Test çalıştır
-npm run test:watch   # Watch modunda test
+# Örnek:
+node scripts/generate-crud.js products
 ```
 
-## 🗺️ Yol Haritası
+Bu komut şunları oluşturur:
+- `src/types/[table-name].ts` - TypeScript types
+- `src/lib/api/[table-name].ts` - API functions
+- `src/hooks/use-[table-name].ts` - React hooks
+- `src/components/admin/[table-name]-manager.tsx` - Admin component
 
-- [x] Proje kurulumu
-- [x] UI component library
-- [x] Klasör yapısı
-- [ ] Supabase auth entegrasyonu
-- [ ] Video feed özelliği
-- [ ] Ürün listeleme
-- [ ] Sepet sistemi
-- [ ] Ödeme entegrasyonu
-- [ ] Canlı yayın özelliği
-- [ ] Mobil uygulama
+### Klasör Yapısı
+
+```
+src/
+├── app/                  # Next.js app router
+│   ├── (auth)/          # Auth routes
+│   ├── (main)/          # Main app routes
+│   └── (legal)/         # Legal pages
+├── components/          
+│   ├── landing/         # Landing page components (Client Components)
+│   ├── ui/              # Shadcn UI components
+│   └── admin/           # Admin components
+├── lib/                 
+│   ├── api/             # API functions
+│   ├── supabase/        # Supabase client
+│   └── utils.ts         # Utility functions
+├── hooks/               # Custom React hooks
+├── stores/              # Zustand stores
+├── types/               # TypeScript types
+└── styles/              # Global styles
+```
+
+## ⚡ Performans Optimizasyonları
+
+### Uygulanan Optimizasyonlar
+
+1. **RSC (React Server Components)**
+   - Landing page Server Component olarak refactor edildi
+   - Sadece interaktif bölümler Client Component
+
+2. **Code Splitting**
+   - Dynamic imports kullanıldı
+   - Lazy loading utilities eklendi
+   - Route-based splitting aktif
+
+3. **Bundle Optimization**
+   - Tree shaking için icon optimizasyonu
+   - Package imports optimize edildi
+   - Unused code elimination
+
+4. **Image Optimization**
+   - Next/Image kullanımı
+   - WebP/AVIF format desteği
+   - Lazy loading images
+
+5. **PWA Features**
+   - Service Worker caching
+   - Offline support
+   - Background sync
+   - Push notifications ready
+
+6. **SEO & Meta Tags**
+   - Structured data
+   - Open Graph tags
+   - Twitter cards
+   - Sitemap generation
+
+## 🚢 Deployment
+
+### Vercel Deployment
+
+```bash
+# Vercel CLI ile
+vercel
+
+# Otomatik deployment için GitHub'a push
+git push origin main
+```
+
+### Docker Deployment
+
+```bash
+# Build
+docker build -t tomnap .
+
+# Run
+docker run -p 3000:3000 tomnap
+```
+
+## 📜 Scripts
+
+```json
+{
+  "dev": "Next.js development server",
+  "build": "Production build",
+  "start": "Production server",
+  "lint": "ESLint check",
+  "generate-icons": "PWA icon generator",
+  "pwa-assets": "Generate all PWA assets"
+}
+```
 
 ## 🤝 Katkıda Bulunma
 
-1. Fork yapın
+1. Fork edin
 2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add amazing feature'`)
-4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
+3. Commit edin (`git commit -m 'Add amazing feature'`)
+4. Push edin (`git push origin feature/amazing-feature`)
 5. Pull Request açın
 
 ## 📄 Lisans
 
-Bu proje MIT lisansı altında lisanslanmıştır.
+MIT License - detaylar için [LICENSE](LICENSE) dosyasına bakın.
 
-## 💬 İletişim
+## 👥 İletişim
 
-- Email: your@email.com
-- Twitter: [@yourusername](https://twitter.com/yourusername)
+- Website: [tomnap.com](https://tomnap.com)
+- Email: info@tomnap.com
+- Twitter: [@tomnap](https://twitter.com/tomnap)
 
 ---
 
 <div align="center">
-  Made with ❤️ using Next.js and Supabase
+  Made with ❤️ by TomNAP Team
 </div>
-
----
-
-## 🧰 Sorun Giderme
-
-- Unknown utility class `border-border` hatası:
-  - Tailwind v4 tokenları için `src/app/globals.css` içinde `@theme inline` tanımlıdır. Değerler `--border`, `--ring`, `--background` gibi HSL tokenlarından türetilir. Derleme yeniden başlatıldığında hata çözülür.
-- shadcn baseColor `violet` kayıt hatası:
-  - Geçici olarak `components.json` ile `baseColor` değiştirilip bileşenler eklendikten sonra tema `globals.css` üzerinden override edilir (şu an `violet` aktif).

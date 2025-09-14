@@ -1,6 +1,9 @@
 import { useEffect, useState, useMemo, useRef, type RefObject } from 'react'
 
-export function useIntersection(targetRef: RefObject<Element>, options?: IntersectionObserverInit) {
+export function useIntersection<T extends Element>(
+  targetRef: RefObject<T | null>,
+  options?: IntersectionObserverInit
+) {
   const [entry, setEntry] = useState<IntersectionObserverEntry | null>(null)
   const observer = useRef<IntersectionObserver | null>(null)
 

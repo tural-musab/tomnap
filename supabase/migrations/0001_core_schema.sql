@@ -1,6 +1,7 @@
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "vector";
 
 -- User roles enum
@@ -31,7 +32,7 @@ CREATE TABLE profiles (
 
 -- Videos table
 CREATE TABLE videos (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   creator_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   video_url TEXT NOT NULL,
   thumbnail_url TEXT NOT NULL,
@@ -54,7 +55,7 @@ CREATE TABLE videos (
 
 -- Products table
 CREATE TABLE products (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   vendor_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT,
@@ -81,7 +82,7 @@ CREATE TABLE products (
 
 -- Video-Product junction table (for product tagging)
 CREATE TABLE video_products (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   video_id UUID REFERENCES videos(id) ON DELETE CASCADE,
   product_id UUID REFERENCES products(id) ON DELETE CASCADE,
   timestamp_start INTEGER,
@@ -111,7 +112,7 @@ CREATE TABLE likes (
 
 -- Comments table
 CREATE TABLE comments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   video_id UUID REFERENCES videos(id) ON DELETE CASCADE,
   parent_id UUID REFERENCES comments(id) ON DELETE CASCADE,
@@ -124,7 +125,7 @@ CREATE TABLE comments (
 
 -- Shopping cart table
 CREATE TABLE cart_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   product_id UUID REFERENCES products(id) ON DELETE CASCADE,
   quantity INTEGER DEFAULT 1,
@@ -136,7 +137,7 @@ CREATE TABLE cart_items (
 
 -- Orders table
 CREATE TABLE orders (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   order_number TEXT UNIQUE NOT NULL,
   status order_status DEFAULT 'pending',
@@ -193,8 +194,16 @@ CREATE POLICY "Public products are viewable by everyone" ON products FOR SELECT 
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Users can create videos" ON videos FOR INSERT WITH CHECK (auth.uid() = creator_id);
 CREATE POLICY "Users can update own videos" ON videos FOR UPDATE USING (auth.uid() = creator_id);
+CREATE POLICY "Users can delete own videos" ON videos FOR DELETE USING (auth.uid() = creator_id);
 CREATE POLICY "Vendors can manage products" ON products FOR ALL USING (auth.uid() = vendor_id);
+CREATE POLICY "Users can delete own comments" ON comments FOR DELETE USING (auth.uid() = user_id);
 CREATE POLICY "Users can manage own cart" ON cart_items FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can view own orders" ON orders FOR SELECT USING (auth.uid() = user_id);
+
+-- Relational visibility: only active, non-banned content
+DROP POLICY IF EXISTS "Public videos are viewable by everyone" ON videos;
+CREATE POLICY "Public videos are viewable by everyone" ON videos FOR SELECT USING (status = 'active');
+DROP POLICY IF EXISTS "Public products are viewable by everyone" ON products;
+CREATE POLICY "Public products are viewable by everyone" ON products FOR SELECT USING (is_active = true);
 
 

@@ -7,6 +7,7 @@ import './globals.css'
 import SonnerToaster from '@/components/ui/sonner-toaster'
 import { AuthProvider } from '@/providers/auth-provider'
 import { QueryProvider } from '@/providers/query-provider'
+import { PerformanceProvider } from '@/providers/performance-provider'
 import AsyncErrorBoundary from '@/components/async-error-boundary'
 
 const geistSans = Geist({
@@ -149,12 +150,14 @@ export default async function RootLayout({
             }
           }}
         >
-          <AuthProvider>
-            <QueryProvider>
-              {children}
-              <SonnerToaster />
-            </QueryProvider>
-          </AuthProvider>
+          <PerformanceProvider>
+            <AuthProvider>
+              <QueryProvider>
+                {children}
+                <SonnerToaster />
+              </QueryProvider>
+            </AuthProvider>
+          </PerformanceProvider>
         </AsyncErrorBoundary>
         
         {/* PWA Service Worker Registration */}

@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ShopFlow - Sosyal Ticaret Platformu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            --dark-bg: #0a0a0b;
+            --surface: #18181b;
+            --surface-light: #27272a;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            touch-action: pan-y;
+        }
+
+        .app-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(10,10,11,0.95) 0%, rgba(10,10,11,0) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px;
+        }
+
+        .video-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 10px 0;
+        }
+
+        .video-tab {
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .video-tab.active {
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        .video-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #ff0000;
+            border-radius: 50%;
+            margin-left: 5px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .screen.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Video Feed Screen */
+        .video-feed {
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            scrollbar-width: none;
+        }
+
+        .video-feed::-webkit-scrollbar {
+            display: none;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            scroll-snap-align: start;
+            background: var(--surface);
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .video-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            padding: 80px 20px 100px 20px;
+        }
+
+        .product-info {
+            margin-bottom: 20px;
+        }
+
+        .seller-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .product-title {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .price-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .original-price {
+            color: var(--text-secondary);
+            text-decoration: line-through;
+            font-size: 16px;
+        }
+
+        .discount-price {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .discount-badge {
+            background: var(--danger);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .video-actions {
+            position: absolute;
+            right: 15px;
+            bottom: 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .action-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .action-button:active {
+            transform: scale(0.9);
+        }
+
+        .action-icon {
+            font-size: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        .action-count {
+            font-size: 12px;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .cart-button-gradient {
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+        }
+
+        /* Social Feed Screen */
+        .social-feed {
+            padding-top: 60px;
+        }
+
+        .stories-container {
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            border-bottom: 1px solid var(--surface-light);
+        }
+
+        .stories-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .story-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .story-border {
+            width: 74px;
+            height: 74px;
+            background: linear-gradient(135deg, #f31559 0%, #f97316 100%);
+            border-radius: 50%;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-border.viewed {
+            background: var(--surface-light);
+            opacity: 0.5;
+        }
+
+        .story-avatar {
+            width: 68px;
+            height: 68px;
+            background: var(--surface);
+            border-radius: 50%;
+            border: 3px solid var(--dark-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .story-username {
+            font-size: 12px;
+            margin-top: 5px;
+            color: var(--text-secondary);
+        }
+
+        .add-story .story-border {
+            background: var(--primary);
+        }
+
+        .feed-posts {
+            padding-bottom: 80px;
+        }
+
+        .feed-post {
+            margin-bottom: 20px;
+            background: var(--surface);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .post-user-info {
+            flex: 1;
+        }
+
+        .post-username {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .post-location {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .post-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+        }
+
+        .product-tag {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+        }
+
+        .post-actions-left {
+            display: flex;
+            gap: 15px;
+        }
+
+        .post-action-icon {
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .post-action-icon:active {
+            transform: scale(0.8);
+        }
+
+        /* Cart Screen */
+        .cart-screen {
+            padding: 20px;
+            padding-top: 80px;
+            padding-bottom: 100px;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .cart-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .clear-cart {
+            color: var(--danger);
+            cursor: pointer;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .empty-cart-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .empty-cart-text {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .shop-now-button {
+            background: var(--primary);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .shop-now-button:active {
+            transform: scale(0.95);
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: var(--surface);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-seller {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .cart-item-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-item-price {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .quantity-control {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .quantity-button {
+            width: 30px;
+            height: 30px;
+            background: var(--surface-light);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .quantity-button:hover {
+            background: var(--primary);
+        }
+
+        .checkout-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: 12px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .total-label {
+            color: var(--text-secondary);
+        }
+
+        .grand-total {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--surface-light);
+        }
+
+        .grand-total .total-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .grand-total .total-value {
+            font-size: 20px;
+            font-weight: bold;
+            background: var(--accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .checkout-button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .checkout-button:active {
+            transform: scale(0.98);
+        }
+
+        /* E-commerce Home */
+        .ecommerce-home {
+            padding: 20px;
+            padding-top: 80px;
+            padding-bottom: 100px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--surface-light);
+            border-radius: 12px;
+            padding: 12px 15px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-button {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .search-button:active {
+            transform: scale(0.95);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .category-card {
+            aspect-ratio: 1;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .category-icon {
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+
+        .category-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .flash-deals {
+            margin-bottom: 30px;
+        }
+
+        .flash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .countdown {
+            background: var(--danger);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .deals-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 10px;
+        }
+
+        .deals-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .deal-card {
+            flex-shrink: 0;
+            width: 150px;
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .deal-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .deal-image {
+            width: 100%;
+            height: 150px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .deal-info {
+            padding: 10px;
+        }
+
+        .deal-title {
+            font-size: 12px;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .deal-price {
+            font-weight: bold;
+            color: var(--danger);
+        }
+
+        .deal-original-price {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-decoration: line-through;
+            margin-left: 5px;
+        }
+
+        .deal-rating {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 11px;
+        }
+
+        .rating-stars {
+            color: #ffd700;
+        }
+
+        .deal-stock {
+            color: var(--danger);
+        }
+
+        /* Profile Screen */
+        .profile-screen {
+            padding: 20px;
+            padding-top: 80px;
+            padding-bottom: 100px;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .profile-type {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .profile-menu {
+            margin-top: 30px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background: var(--surface-light);
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .menu-title {
+            flex: 1;
+        }
+
+        .menu-badge {
+            background: var(--danger);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .menu-arrow {
+            color: var(--text-secondary);
+            font-size: 20px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(24, 24, 27, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--surface-light);
+            display: flex;
+            padding: 10px 0 20px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .nav-item:active {
+            transform: scale(0.9);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            transition: font-size 0.2s ease;
+        }
+
+        .nav-item.active .nav-icon {
+            font-size: 28px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .nav-item.active .nav-label {
+            color: var(--text-primary);
+        }
+
+        .nav-indicator {
+            position: absolute;
+            top: -1px;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-item.active .nav-indicator {
+            opacity: 1;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: 20px;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* Animations */
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .liked {
+            animation: heartBeat 0.5s ease;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 480px;
+                margin: 0 auto;
+                box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--surface-light);
+            border-top-color: var(--text-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Content Area -->
+        <div class="content" id="content">
+            <!-- Video Feed Screen -->
+            <div class="screen active" id="screen-0">
+                <div class="header">
+                    <div class="video-tabs">
+                        <div class="video-tab active">Sizin İçin</div>
+                        <div class="video-tab">Takip</div>
+                        <div class="video-tab">Canlı<span class="live-indicator"></span></div>
+                    </div>
+                </div>
+                <div class="video-feed" id="videoFeed">
+                    <!-- Videos will be generated here -->
+                </div>
+            </div>
+
+            <!-- Social Feed Screen -->
+            <div class="screen" id="screen-1">
+                <div class="header">
+                    <div style="text-align: center; padding: 10px;">
+                        <h2>ShopFlow</h2>
+                    </div>
+                </div>
+                <div class="social-feed">
+                    <div class="stories-container">
+                        <div class="story-item add-story">
+                            <div class="story-border">
+                                <div class="story-avatar">➕</div>
+                            </div>
+                            <div class="story-username">Hikaye Ekle</div>
+                        </div>
+                    </div>
+                    <div class="feed-posts" id="feedPosts">
+                        <!-- Posts will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Screen -->
+            <div class="screen" id="screen-2">
+                <div class="cart-screen">
+                    <div class="cart-header">
+                        <h2 class="cart-title">Sepetim (<span id="cartCount">0</span>)</h2>
+                        <span class="clear-cart" onclick="clearCart()">Temizle</span>
+                    </div>
+                    <div id="cartContent">
+                        <div class="empty-cart">
+                            <div class="empty-cart-icon">🛒</div>
+                            <div class="empty-cart-text">Sepetiniz boş</div>
+                            <button class="shop-now-button" onclick="switchScreen(0)">Alışverişe Başla</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E-commerce Home Screen -->
+            <div class="screen" id="screen-3">
+                <div class="ecommerce-home">
+                    <div class="search-container">
+                        <input type="text" class="search-input" placeholder="Ürün, marka veya kategori ara...">
+                        <button class="search-button">🔍</button>
+                    </div>
+
+                    <div class="section-title">Kategoriler</div>
+                    <div class="categories-grid">
+                        <div class="category-card">
+                            <div class="category-icon">📱</div>
+                            <div class="category-name">Elektronik</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">👕</div>
+                            <div class="category-name">Moda</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">🏠</div>
+                            <div class="category-name">Ev & Yaşam</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">⚽</div>
+                            <div class="category-name">Spor</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">💄</div>
+                            <div class="category-name">Kozmetik</div>
+                        </div>
+                        <div class="category-card">
+                            <div class="category-icon">🎮</div>
+                            <div class="category-name">Oyun</div>
+                        </div>
+                    </div>
+
+                    <div class="flash-deals">
+                        <div class="flash-header">
+                            <div class="section-title">⚡ Flaş İndirimler</div>
+                            <div class="countdown" id="countdown">02:34:15</div>
+                        </div>
+                        <div class="deals-scroll" id="dealsScroll">
+                            <!-- Deals will be generated here -->
+                        </div>
+                    </div>
+
+                    <div class="section-title">Size Özel</div>
+                    <div class="deals-scroll" id="recommendationsScroll">
+                        <!-- Recommendations will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Screen -->
+            <div class="screen" id="screen-4">
+                <div class="profile-screen">
+                    <div class="profile-header">
+                        <div class="profile-avatar">👤</div>
+                        <div class="profile-name">Mehmet Yılmaz</div>
+                        <div class="profile-type">Premium Müşteri ⭐</div>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">156</div>
+                                <div class="stat-label">Sipariş</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">89</div>
+                                <div class="stat-label">Takip</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">4.9</div>
+                                <div class="stat-label">Puan</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-menu">
+                        <div class="menu-item">
+                            <span class="menu-icon">📦</span>
+                            <span class="menu-title">Siparişlerim</span>
+                            <span class="menu-badge">3</span>
+                            <span class="menu-arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <span class="menu-icon">❤️</span>
+                            <span class="menu-title">Favorilerim</span>
+                            <span class="menu-badge">12</span>
+                            <span class="menu-arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <span class="menu-icon">🎬</span>
+                            <span class="menu-title">İzleme Geçmişi</span>
+                            <span class="menu-arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <span class="menu-icon">📍</span>
+                            <span class="menu-title">Adreslerim</span>
+                            <span class="menu-arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <span class="menu-icon">💳</span>
+                            <span class="menu-title">Ödeme Yöntemlerim</span>
+                            <span class="menu-arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <span class="menu-icon">🎁</span>
+                            <span class="menu-title">Kuponlarım</span>
+                            <span class="menu-badge">5</span>
+                            <span class="menu-arrow">›</span>
+                        </div>
+                        <div class="menu-item">
+                            <span class="menu-icon">⚙️</span>
+                            <span class="menu-title">Ayarlar</span>
+                            <span class="menu-arrow">›</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchScreen(0)">
+                <div class="nav-indicator"></div>
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Ana Sayfa</span>
+            </div>
+            <div class="nav-item" onclick="switchScreen(1)">
+                <div class="nav-indicator"></div>
+                <span class="nav-icon">📸</span>
+                <span class="nav-label">Keşfet</span>
+            </div>
+            <div class="nav-item" onclick="switchScreen(2)">
+                <div class="nav-indicator"></div>
+                <span class="nav-icon">🛒</span>
+                <span class="nav-label">Sepet</span>
+                <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+            </div>
+            <div class="nav-item" onclick="switchScreen(3)">
+                <div class="nav-indicator"></div>
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">Mağaza</span>
+            </div>
+            <div class="nav-item" onclick="switchScreen(4)">
+                <div class="nav-indicator"></div>
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Profil</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let currentScreen = 0;
+        let cart = [];
+        let products = [
+            {
+                id: 1,
+                title: 'Trending Sneakers - Limited Edition',
+                price: 899,
+                discountPrice: 649,
+                seller: 'NikeStore',
+                rating: 4.8,
+                icon: '👟',
+                likes: 15234,
+                comments: 342,
+                isLiked: false
+            },
+            {
+                id: 2,
+                title: 'Wireless Earbuds Pro Max',
+                price: 1299,
+                discountPrice: 999,
+                seller: 'TechHub',
+                rating: 4.9,
+                icon: '🎧',
+                likes: 8932,
+                comments: 156,
+                isLiked: false
+            },
+            {
+                id: 3,
+                title: 'Designer Handbag Collection',
+                price: 2499,
+                discountPrice: null,
+                seller: 'LuxuryBrands',
+                rating: 5.0,
+                icon: '👜',
+                likes: 23451,
+                comments: 892,
+                isLiked: false
+            },
+            {
+                id: 4,
+                title: 'Smart Watch Ultra',
+                price: 3999,
+                discountPrice: 2999,
+                seller: 'AppleStore',
+                rating: 4.7,
+                icon: '⌚',
+                likes: 45678,
+                comments: 1234,
+                isLiked: false
+            },
+            {
+                id: 5,
+                title: 'Gaming Laptop RTX 4090',
+                price: 89999,
+                discountPrice: 74999,
+                seller: 'GamerZone',
+                rating: 4.9,
+                icon: '💻',
+                likes: 12345,
+                comments: 567,
+                isLiked: false
+            }
+        ];
+
+        // Initialize App
+        function init() {
+            generateVideoFeed();
+            generateSocialFeed();
+            generateDeals();
+            updateCartUI();
+            startCountdown();
+        }
+
+        // Generate Video Feed
+        function generateVideoFeed() {
+            const videoFeed = document.getElementById('videoFeed');
+            videoFeed.innerHTML = products.map(product => `
+                <div class="video-container">
+                    <div class="video-placeholder">${product.icon}</div>
+                    <div class="video-overlay">
+                        <div class="product-info">
+                            <div class="seller-name">@${product.seller} ✓</div>
+                            <div class="product-title">${product.title}</div>
+                            <div class="price-container">
+                                ${product.discountPrice ? `<span class="original-price">₺${product.price}</span>` : ''}
+                                <span class="discount-price">₺${product.discountPrice || product.price}</span>
+                                ${product.discountPrice ? `
+                                    <span class="discount-badge">%${Math.round((1 - product.discountPrice / product.price) * 100)} İndirim</span>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-actions">
+                        <div class="action-button" onclick="toggleLike(${product.id})">
+                            <span class="action-icon" id="like-${product.id}">${product.isLiked ? '❤️' : '🤍'}</span>
+                            <span class="action-count">${formatNumber(product.likes)}</span>
+                        </div>
+                        <div class="action-button">
+                            <span class="action-icon">💬</span>
+                            <span class="action-count">${formatNumber(product.comments)}</span>
+                        </div>
+                        <div class="action-button">
+                            <span class="action-icon">📤</span>
+                            <span class="action-count">Paylaş</span>
+                        </div>
+                        <div class="action-button">
+                            <span class="action-icon">🔖</span>
+                            <span class="action-count">Kaydet</span>
+                        </div>
+                        <div class="action-button" onclick="addToCart(${product.id})">
+                            <div class="cart-button-gradient">
+                                <span class="action-icon">🛒</span>
+                            </div>
+                            <span class="action-count">Sepete Ekle</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Generate Social Feed
+        function generateSocialFeed() {
+            const feedPosts = document.getElementById('feedPosts');
+            feedPosts.innerHTML = products.map(product => `
+                <div class="feed-post">
+                    <div class="post-header">
+                        <div class="post-avatar">${product.icon}</div>
+                        <div class="post-user-info">
+                            <div class="post-username">${product.seller}</div>
+                            <div class="post-location">İstanbul, Türkiye</div>
+                        </div>
+                        <span class="menu-icon">⋯</span>
+                    </div>
+                    <div class="post-image">
+                        ${product.icon}
+                        <div class="product-tag">₺${product.discountPrice || product.price}</div>
+                    </div>
+                    <div class="post-actions">
+                        <div class="post-actions-left">
+                            <span class="post-action-icon" onclick="toggleLike(${product.id})">${product.isLiked ? '❤️' : '🤍'}</span>
+                            <span class="post-action-icon">💬</span>
+                            <span class="post-action-icon">📤</span>
+                        </div>
+                        <span class="post-action-icon" onclick="addToCart(${product.id})">🛒</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Generate Deals
+        function generateDeals() {
+            const dealsScroll = document.getElementById('dealsScroll');
+            const recommendationsScroll = document.getElementById('recommendationsScroll');
+            
+            const dealCards = products.map(product => `
+                <div class="deal-card" onclick="addToCart(${product.id})">
+                    <div class="deal-image">${product.icon}</div>
+                    <div class="deal-info">
+                        <div class="deal-title">${product.title}</div>
+                        <div>
+                            <span class="deal-price">₺${product.discountPrice || product.price}</span>
+                            ${product.discountPrice ? `<span class="deal-original-price">₺${product.price}</span>` : ''}
+                        </div>
+                        <div class="deal-rating">
+                            <span class="rating-stars">⭐ ${product.rating}</span>
+                            <span class="deal-stock">Son 5 ürün!</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            dealsScroll.innerHTML = dealCards;
+            recommendationsScroll.innerHTML = dealCards;
+        }
+
+        // Switch Screen
+        function switchScreen(screenIndex) {
+            currentScreen = screenIndex;
+            
+            // Update screens
+            document.querySelectorAll('.screen').forEach((screen, index) => {
+                screen.classList.toggle('active', index === screenIndex);
+            });
+            
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach((item, index) => {
+                item.classList.toggle('active', index === screenIndex);
+            });
+        }
+
+        // Add to Cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!cart.find(item => item.id === productId)) {
+                cart.push({...product, quantity: 1});
+                updateCartUI();
+                showNotification('Ürün sepete eklendi! 🛒');
+                
+                // Vibrate if available
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            } else {
+                showNotification('Ürün zaten sepette! ⚠️');
+            }
+        }
+
+        // Toggle Like
+        function toggleLike(productId) {
+            const product = products.find(p => p.id === productId);
+            product.isLiked = !product.isLiked;
+            product.likes += product.isLiked ? 1 : -1;
+            
+            const likeIcon = document.getElementById(`like-${productId}`);
+            if (likeIcon) {
+                likeIcon.textContent = product.isLiked ? '❤️' : '🤍';
+                likeIcon.classList.add('liked');
+                setTimeout(() => likeIcon.classList.remove('liked'), 500);
+            }
+            
+            generateVideoFeed();
+            generateSocialFeed();
+            
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        }
+
+        // Update Cart UI
+        function updateCartUI() {
+            const cartCount = document.getElementById('cartCount');
+            const cartBadge = document.getElementById('cartBadge');
+            const cartContent = document.getElementById('cartContent');
+            
+            cartCount.textContent = cart.length;
+            cartBadge.textContent = cart.length;
+            cartBadge.style.display = cart.length > 0 ? 'block' : 'none';
+            
+            if (cart.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <div class="empty-cart-text">Sepetiniz boş</div>
+                        <button class="shop-now-button" onclick="switchScreen(0)">Alışverişe Başla</button>
+                    </div>
+                `;
+            } else {
+                const total = cart.reduce((sum, item) => sum + (item.discountPrice || item.price) * item.quantity, 0);
+                const shipping = 29.90;
+                
+                cartContent.innerHTML = `
+                    ${cart.map(item => `
+                        <div class="cart-item">
+                            <div class="cart-item-image">${item.icon}</div>
+                            <div class="cart-item-info">
+                                <div class="cart-item-title">${item.title}</div>
+                                <div class="cart-item-seller">Satıcı: ${item.seller}</div>
+                                <div class="cart-item-price-row">
+                                    <div class="cart-item-price">₺${item.discountPrice || item.price}</div>
+                                    <div class="quantity-control">
+                                        <button class="quantity-button" onclick="updateQuantity(${item.id}, -1)">-</button>
+                                        <span>${item.quantity}</span>
+                                        <button class="quantity-button" onclick="updateQuantity(${item.id}, 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div class="checkout-section">
+                        <div class="total-row">
+                            <span class="total-label">Ara Toplam:</span>
+                            <span>₺${total.toFixed(2)}</span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Kargo:</span>
+                            <span>₺${shipping.toFixed(2)}</span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span class="total-label">Toplam:</span>
+                            <span class="total-value">₺${(total + shipping).toFixed(2)}</span>
+                        </div>
+                        <button class="checkout-button" onclick="checkout()">Siparişi Tamamla</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Update Quantity
+        function updateQuantity(productId, change) {
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(item => item.id !== productId);
+                }
+                updateCartUI();
+            }
+        }
+
+        // Clear Cart
+        function clearCart() {
+            if (confirm('Sepeti temizlemek istediğinize emin misiniz?')) {
+                cart = [];
+                updateCartUI();
+                showNotification('Sepet temizlendi! 🧹');
+            }
+        }
+
+        // Checkout
+        function checkout() {
+            showNotification('Siparişiniz alındı! ✅');
+            cart = [];
+            updateCartUI();
+            switchScreen(4);
+        }
+
+        // Show Notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--surface);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+        // Format Number
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        // Countdown Timer
+        function startCountdown() {
+            let hours = 2, minutes = 34, seconds = 15;
+            
+            setInterval(() => {
+                seconds--;
+                if (seconds < 0) {
+                    seconds = 59;
+                    minutes--;
+                    if (minutes < 0) {
+                        minutes = 59;
+                        hours--;
+                        if (hours < 0) {
+                            hours = 2;
+                            minutes = 34;
+                            seconds = 15;
+                        }
+                    }
+                }
+                
+                const countdown = document.getElementById('countdown');
+                if (countdown) {
+                    countdown.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // Touch Support for Swipe
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeDistance = touchStartY - touchEndY;
+            // Add swipe logic here if needed
+        }
+
+        // Initialize on load
+        window.addEventListener('load', init);
+
+        // Add smooth scroll behavior
+        document.querySelectorAll('.video-feed').forEach(element => {
+            element.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                element.scrollBy({
+                    top: e.deltaY < 0 ? -window.innerHeight : window.innerHeight,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

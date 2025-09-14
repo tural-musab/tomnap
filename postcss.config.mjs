@@ -1,5 +1,6 @@
-const config = {
-  plugins: ["@tailwindcss/postcss"],
-};
-
-export default config;
+export default {
+  // Next.js beklediği biçim: plugin adı -> seçenekler
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+}

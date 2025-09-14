@@ -1,7 +1,9 @@
+import VideoFeed from '@/components/features/video-feed/video-feed'
+
 export default function FeedPage() {
   return (
-    <main>
-      <h1>Feed</h1>
+    <main className="min-h-screen bg-black">
+      <VideoFeed />
     </main>
   )
 }

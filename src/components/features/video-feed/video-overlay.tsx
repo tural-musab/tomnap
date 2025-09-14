@@ -14,8 +14,8 @@ interface CreatorInfo {
 }
 
 interface ProductBrief {
-  id?: string
-  title?: string
+  id: string
+  title: string
 }
 
 interface VideoOverlayProps {
@@ -26,7 +26,9 @@ interface VideoOverlayProps {
 export default function VideoOverlay({ video, onProductClick }: VideoOverlayProps) {
   const products = useMemo(() => {
     const vp = video?.video_products ?? []
-    return vp.map((p) => p.product).filter(Boolean) as ProductBrief[]
+    return vp
+      .map((p) => p.product)
+      .filter((x): x is ProductBrief => !!x && typeof x.id === 'string' && typeof x.title === 'string')
   }, [video])
 
   const creator = (video?.creator ?? {}) as CreatorInfo
