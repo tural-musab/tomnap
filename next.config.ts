@@ -163,13 +163,17 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withSentryConfig(nextConfig, {
-  // Sentry Webpack Plugin Options
-  org: 'tomnap',
-  project: 'tomnap',
+const isSentryEnabled = Boolean(
+  process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_ORG && process.env.SENTRY_PROJECT
+)
+
+const configWithSentry = withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG || 'tomnap-xm',
+  project: process.env.SENTRY_PROJECT || 'tomnap',
   silent: !process.env.CI,
-  widenClientFileUpload: true,
   tunnelRoute: '/monitoring',
   disableLogger: true,
   automaticVercelMonitors: true,
 })
+
+export default isSentryEnabled ? configWithSentry : nextConfig
