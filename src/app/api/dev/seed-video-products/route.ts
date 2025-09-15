@@ -15,13 +15,15 @@ export async function POST(): Promise<Response> {
 
   const { data: videos } = await supabase
     .from('videos')
-    .select<RowId>('id')
+    .select('id')
+    .returns<RowId>()
     .order('created_at', { ascending: false })
     .limit(2)
 
   const { data: products } = await supabase
     .from('products')
-    .select<RowId>('id')
+    .select('id')
+    .returns<RowId>()
     .order('created_at', { ascending: false })
     .limit(2)
   if (!videos?.length || !products?.length) {
