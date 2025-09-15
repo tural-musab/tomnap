@@ -1,19 +1,40 @@
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+import type { ReactElement } from 'react'
 import { notFound } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
 
-interface ProductPageProps {
-  params: { id: string }
+type AnyPromise = Promise<unknown>
+
+interface ProductRecord {
+  id: string
+  title: string
+  description?: string | null
+  price?: number | null
+  currency?: string | null
+  images?: string[] | null
+  category?: string | null
+  stock_quantity?: number | null
+  barcode?: string | null
+  created_at?: string
+  updated_at?: string
+  vendor?: {
+    id?: string
+    username?: string | null
+    full_name?: string | null
+    avatar_url?: string | null
+    is_verified?: boolean | null
+  } | null
 }
 
-async function getProduct(id: string) {
+async function getProduct(id: string): Promise<ProductRecord | null> {
   const supabase = await createClient()
-  
+
   const { data: product, error } = await supabase
     .from('products')
-    .select(`
+    .select(
+      `
       *,
       vendor:profiles!vendor_id(
         id, 
@@ -22,7 +43,8 @@ async function getProduct(id: string) {
         avatar_url,
         is_verified
       )
-    `)
+    `
+    )
     .eq('id', id)
     .eq('status', 'active')
     .single()
@@ -31,16 +53,17 @@ async function getProduct(id: string) {
     return null
   }
 
-  return product
+  return product as unknown as ProductRecord
 }
 
-export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const product = await getProduct(params.id)
+export async function generateMetadata({ params }: { params?: AnyPromise }): Promise<Metadata> {
+  const p = (params ? await params : undefined) as { id?: string } | undefined
+  const product = p?.id ? await getProduct(p.id) : null
 
   if (!product) {
     return {
       title: 'Ürün Bulunamadı',
-      description: 'Aradığınız ürün mevcut değil veya kaldırılmış.'
+      description: 'Aradığınız ürün mevcut değil veya kaldırılmış.',
     }
   }
 
@@ -58,21 +81,24 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       vendorName,
       'TomNAP',
       'online alışveriş',
-      'e-ticaret'
+      'e-ticaret',
     ].filter(Boolean),
     openGraph: {
       title: productTitle,
       description: productDescription,
       url: `https://tomnap.com/products/${product.id}`,
       siteName: 'TomNAP',
-      images: product.images ? [
-        {
-          url: product.images[0],
-          width: 1200,
-          height: 630,
-          alt: productTitle,
-        }
-      ] : [],
+      images:
+        product.images && product.images.length > 0 && product.images[0]
+          ? [
+              {
+                url: product.images[0]!,
+                width: 1200,
+                height: 630,
+                alt: productTitle,
+              },
+            ]
+          : [],
       locale: 'tr_TR',
       type: 'website',
     },
@@ -80,13 +106,21 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       card: 'summary_large_image',
       title: productTitle,
       description: productDescription,
-      images: product.images ? [product.images[0]] : [],
-    }
+      images:
+        product.images && product.images.length > 0 && product.images[0]
+          ? [String(product.images[0])]
+          : [],
+    },
   }
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProduct(params.id)
+export default async function ProductPage({
+  params,
+}: {
+  params?: AnyPromise
+}): Promise<ReactElement> {
+  const p = (params ? await params : undefined) as { id?: string } | undefined
+  const product = p?.id ? await getProduct(p.id) : null
 
   if (!product) {
     notFound()
@@ -101,25 +135,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
     image: product.images || [],
     brand: {
       '@type': 'Brand',
-      name: vendorName
+      name: vendorName,
     },
     manufacturer: {
       '@type': 'Organization',
-      name: vendorName
+      name: vendorName,
     },
     offers: {
       '@type': 'Offer',
       price: product.price || 0,
       priceCurrency: product.currency || 'TRY',
-      availability: product.stock_quantity && product.stock_quantity > 0 
-        ? 'https://schema.org/InStock' 
-        : 'https://schema.org/OutOfStock',
+      availability:
+        product.stock_quantity && product.stock_quantity > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
       seller: {
         '@type': 'Organization',
-        name: vendorName
+        name: vendorName,
       },
       url: `https://tomnap.com/products/${product.id}`,
-      itemCondition: 'https://schema.org/NewCondition'
+      itemCondition: 'https://schema.org/NewCondition',
     },
     category: product.category,
     sku: product.id,
@@ -127,7 +162,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     productID: product.id,
     url: `https://tomnap.com/products/${product.id}`,
     dateCreated: product.created_at,
-    dateModified: product.updated_at
+    dateModified: product.updated_at,
   }
 
   return (
@@ -153,12 +188,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
               />
             </div>
           )}
-          
+
           {/* Additional Images */}
           {product.images && product.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {product.images.slice(1, 5).map((image, index) => (
-                <div key={index} className="aspect-square relative rounded overflow-hidden bg-gray-100">
+                <div
+                  key={index}
+                  className="aspect-square relative rounded overflow-hidden bg-gray-100"
+                >
                   <img
                     src={image}
                     alt={`${product.title} - ${index + 2}`}
@@ -173,17 +211,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Product Info */}
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              {product.title}
-            </h1>
-            
+            <h1 className="text-3xl font-bold text-foreground mb-2">{product.title}</h1>
+
             {product.vendor && (
               <div className="flex items-center gap-2 text-muted-foreground mb-4">
                 <span>Satıcı:</span>
                 <span className="font-medium">{vendorName}</span>
-                {product.vendor.is_verified && (
-                  <span className="text-blue-500">✓</span>
-                )}
+                {product.vendor.is_verified && <span className="text-blue-500">✓</span>}
               </div>
             )}
           </div>
