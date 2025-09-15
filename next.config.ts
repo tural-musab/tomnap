@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: 'standalone', // Enable standalone output for Docker
   serverExternalPackages: ['lightningcss', 'lightningcss-darwin-arm64', '@tailwindcss/node'],
+  // Avoid failing Vercel builds due to lint errors; we run lint in CI locally
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     remotePatterns: [
       {
