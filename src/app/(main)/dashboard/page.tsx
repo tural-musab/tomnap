@@ -10,36 +10,41 @@ import AdminDashboard from '@/components/features/dashboard/admin-dashboard'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   type Profile = Database['public']['Tables']['profiles']['Row']
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, username, full_name, avatar_url, role, follower_count, following_count, is_verified')
+    .select(
+      'id, username, full_name, avatar_url, role, follower_count, following_count, is_verified'
+    )
     .eq('id', user.id)
     .single()
 
-  const role: Profile['role'] = (profile?.role ?? 'customer') as Profile['role']
+  const profileData = (profile ?? null) as Profile | null
+  const role: Profile['role'] = (profileData?.role ?? 'customer') as Profile['role']
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#13131a] to-[#0a0a0f] text-white">
       <section className="relative mb-4 overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 p-4 text-white">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-          <div className="h-14 w-14 overflow-hidden rounded-xl ring-1 ring-white/30">
-            <Image
-              src={profile?.avatar_url || '/icons/placeholder.svg'}
-              alt={profile?.full_name ?? 'Kullanıcı'}
-              width={56}
-              height={56}
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div>
-            <div className="text-sm/5 opacity-80">{role.toUpperCase()}</div>
-            <h1 className="text-lg font-semibold">{profile?.full_name || user.email}</h1>
-          </div>
+            <div className="h-14 w-14 overflow-hidden rounded-xl ring-1 ring-white/30">
+              <Image
+                src={profileData?.avatar_url || '/icons/placeholder.svg'}
+                alt={profileData?.full_name ?? 'Kullanıcı'}
+                width={56}
+                height={56}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div>
+              <div className="text-sm/5 opacity-80">{role.toUpperCase()}</div>
+              <h1 className="text-lg font-semibold">{profileData?.full_name || user.email}</h1>
+            </div>
           </div>
           <form action={logout}>
             <button
@@ -64,5 +69,3 @@ export default async function DashboardPage() {
     </main>
   )
 }
-
-
