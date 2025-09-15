@@ -3,16 +3,15 @@ import { notFound } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/server'
 
-interface VideoPageProps {
-  params: { id: string }
-}
+type AnyPromise = Promise<unknown>
 
 async function getVideo(id: string) {
   const supabase = await createClient()
-  
+
   const { data: video, error } = await supabase
     .from('videos')
-    .select(`
+    .select(
+      `
       *,
       creator:profiles!creator_id(
         id, 
@@ -26,7 +25,8 @@ async function getVideo(id: string) {
         *,
         product:products(*)
       )
-    `)
+    `
+    )
     .eq('id', id)
     .eq('status', 'active')
     .single()
@@ -38,18 +38,21 @@ async function getVideo(id: string) {
   return video
 }
 
-export async function generateMetadata({ params }: VideoPageProps): Promise<Metadata> {
-  const video = await getVideo(params.id)
+export async function generateMetadata({ params }: { params?: AnyPromise }): Promise<Metadata> {
+  const p = (params ? await params : undefined) as { id?: string } | undefined
+  const video = p?.id ? await getVideo(p.id) : null
 
   if (!video) {
     return {
       title: 'Video Bulunamadı',
-      description: 'Aradığınız video mevcut değil veya kaldırılmış.'
+      description: 'Aradığınız video mevcut değil veya kaldırılmış.',
     }
   }
 
   const videoTitle = video.title || 'TomNAP Video'
-  const videoDescription = video.description || `${video.creator?.full_name || video.creator?.username || 'Anonim'} tarafından paylaşılan video`
+  const videoDescription =
+    video.description ||
+    `${video.creator?.full_name || video.creator?.username || 'Anonim'} tarafından paylaşılan video`
   const creatorName = video.creator?.full_name || video.creator?.username || 'TomNAP Creator'
 
   return {
@@ -61,21 +64,23 @@ export async function generateMetadata({ params }: VideoPageProps): Promise<Meta
       'TomNAP video',
       'sosyal ticaret',
       'video alışveriş',
-      ...(video.tags || [])
+      ...(video.tags || []),
     ],
     openGraph: {
       title: videoTitle,
       description: videoDescription,
       url: `https://tomnap.com/videos/${video.id}`,
       siteName: 'TomNAP',
-      images: video.thumbnail_url ? [
-        {
-          url: video.thumbnail_url,
-          width: 1200,
-          height: 630,
-          alt: videoTitle,
-        }
-      ] : [],
+      images: video.thumbnail_url
+        ? [
+            {
+              url: video.thumbnail_url,
+              width: 1200,
+              height: 630,
+              alt: videoTitle,
+            },
+          ]
+        : [],
       locale: 'tr_TR',
       type: 'video.other',
       videos: [
@@ -85,8 +90,8 @@ export async function generateMetadata({ params }: VideoPageProps): Promise<Meta
           type: 'video/mp4',
           width: 1080,
           height: 1920,
-        }
-      ]
+        },
+      ],
     },
     twitter: {
       card: 'player',
@@ -99,14 +104,15 @@ export async function generateMetadata({ params }: VideoPageProps): Promise<Meta
           streamUrl: video.video_url,
           width: 480,
           height: 854,
-        }
+        },
       ],
-    }
+    },
   }
 }
 
-export default async function VideoPage({ params }: VideoPageProps) {
-  const video = await getVideo(params.id)
+export default async function VideoPage({ params }: { params?: AnyPromise }) {
+  const p = (params ? await params : undefined) as { id?: string } | undefined
+  const video = p?.id ? await getVideo(p.id) : null
 
   if (!video) {
     notFound()
@@ -128,30 +134,30 @@ export default async function VideoPage({ params }: VideoPageProps) {
       name: 'TomNAP',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://tomnap.com/logo.png'
-      }
+        url: 'https://tomnap.com/logo.png',
+      },
     },
     author: {
       '@type': 'Person',
       name: creatorName,
       url: `https://tomnap.com/profile/${video.creator?.username}`,
-      image: video.creator?.avatar_url
+      image: video.creator?.avatar_url,
     },
     interactionStatistic: [
       {
         '@type': 'InteractionCounter',
         interactionType: 'https://schema.org/WatchAction',
-        userInteractionCount: video.views_count || 0
+        userInteractionCount: video.views_count || 0,
       },
       {
         '@type': 'InteractionCounter',
         interactionType: 'https://schema.org/LikeAction',
-        userInteractionCount: video.likes_count || 0
-      }
+        userInteractionCount: video.likes_count || 0,
+      },
     ],
     keywords: video.tags ? video.tags.join(', ') : undefined,
     inLanguage: 'tr-TR',
-    isFamilyFriendly: true
+    isFamilyFriendly: true,
   }
 
   // Breadcrumb schema
@@ -163,21 +169,21 @@ export default async function VideoPage({ params }: VideoPageProps) {
         '@type': 'ListItem',
         position: 1,
         name: 'Ana Sayfa',
-        item: 'https://tomnap.com'
+        item: 'https://tomnap.com',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Video Feed',
-        item: 'https://tomnap.com/feed'
+        item: 'https://tomnap.com/feed',
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: video.title || 'Video',
-        item: `https://tomnap.com/videos/${video.id}`
-      }
-    ]
+        item: `https://tomnap.com/videos/${video.id}`,
+      },
+    ],
   }
 
   return (
@@ -190,7 +196,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
           __html: JSON.stringify(videoSchema),
         }}
       />
-      
+
       <Script
         id="breadcrumb-schema"
         type="application/ld+json"
@@ -216,14 +222,10 @@ export default async function VideoPage({ params }: VideoPageProps) {
 
           {/* Video Info */}
           <div className="mt-6 space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">
-              {video.title || 'TomNAP Video'}
-            </h1>
+            <h1 className="text-2xl font-bold text-foreground">{video.title || 'TomNAP Video'}</h1>
 
             {video.description && (
-              <p className="text-muted-foreground leading-relaxed">
-                {video.description}
-              </p>
+              <p className="text-muted-foreground leading-relaxed">{video.description}</p>
             )}
 
             {/* Creator Info */}
@@ -239,9 +241,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{creatorName}</span>
-                    {video.creator.is_verified && (
-                      <span className="text-blue-500 text-sm">✓</span>
-                    )}
+                    {video.creator.is_verified && <span className="text-blue-500 text-sm">✓</span>}
                   </div>
                   {video.creator.follower_count !== null && (
                     <span className="text-sm text-muted-foreground">
@@ -278,7 +278,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                 {new Date(video.created_at).toLocaleDateString('tr-TR', {
                   day: 'numeric',
                   month: 'long',
-                  year: 'numeric'
+                  year: 'numeric',
                 })}
               </span>
             </div>
@@ -288,7 +288,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
         {/* Related Products */}
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Videodaki Ürünler</h2>
-          
+
           {video.video_products && video.video_products.length > 0 ? (
             <div className="space-y-4">
               {video.video_products.map((vp, index) => {
@@ -296,7 +296,10 @@ export default async function VideoPage({ params }: VideoPageProps) {
                 if (!product) return null
 
                 return (
-                  <div key={index} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                  <div
+                    key={index}
+                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                  >
                     {product.images && product.images.length > 0 && (
                       <div className="aspect-square w-full mb-3 rounded-lg overflow-hidden bg-gray-100">
                         <img
@@ -306,17 +309,15 @@ export default async function VideoPage({ params }: VideoPageProps) {
                         />
                       </div>
                     )}
-                    
-                    <h3 className="font-medium mb-2 line-clamp-2">
-                      {product.title}
-                    </h3>
-                    
+
+                    <h3 className="font-medium mb-2 line-clamp-2">{product.title}</h3>
+
                     {product.price && (
                       <div className="text-lg font-bold text-primary mb-3">
                         {product.price.toLocaleString('tr-TR')} TL
                       </div>
                     )}
-                    
+
                     <button className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
                       Ürünü Görüntüle
                     </button>
