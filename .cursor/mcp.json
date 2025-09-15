@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "Sentry": {
-      "url": "https://mcp.sentry.dev/mcp/tomnap/tomnap"
+      "url": "https://mcp.sentry.dev/mcp/tomnap-xm/tomnap"
     }
   }
 }

@@ -42,7 +42,7 @@ export default function Page() {
 
         <p className="description">
           Click the button below, and view the sample error on the Sentry{' '}
-          <a target="_blank" href="https://tomnap.sentry.io/issues/?project=4510000998973520">
+          <a target="_blank" href="https://tomnap-xm.sentry.io/issues/?project=4510025032794192">
             Issues Page
           </a>
           . For more details about setting up Sentry,{' '}
