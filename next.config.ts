@@ -172,7 +172,4 @@ export default withSentryConfig(nextConfig, {
   tunnelRoute: '/monitoring',
   disableLogger: true,
   automaticVercelMonitors: true,
-  hideSourceMaps: true,
-  disableServerWebpackPlugin: false,
-  disableClientWebpackPlugin: false,
 })
