@@ -78,7 +78,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .limit(100) // Limit verified profiles
 
     // Product pages
-    const productRoutes: MetadataRoute.Sitemap = (products || []).map((product) => ({
+    const productRoutes: MetadataRoute.Sitemap = ((products || []) as any[]).map((product: any) => ({
       url: `${baseUrl}/products/${product.id}`,
       lastModified: new Date(product.updated_at),
       changeFrequency: 'weekly' as const,
@@ -86,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
 
     // Video pages
-    const videoRoutes: MetadataRoute.Sitemap = (videos || []).map((video) => ({
+    const videoRoutes: MetadataRoute.Sitemap = ((videos || []) as any[]).map((video: any) => ({
       url: `${baseUrl}/videos/${video.id}`,
       lastModified: new Date(video.updated_at),
       changeFrequency: 'weekly' as const,
@@ -94,7 +94,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
 
     // Profile pages (only verified profiles)
-    const profileRoutes: MetadataRoute.Sitemap = (profiles || []).map((profile) => ({
+    const profileRoutes: MetadataRoute.Sitemap = ((profiles || []) as any[]).map((profile: any) => ({
       url: `${baseUrl}/profile/${profile.username}`,
       lastModified: new Date(profile.updated_at),
       changeFrequency: 'weekly' as const,

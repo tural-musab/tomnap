@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
-export default function SdkPage(): JSX.Element {
+export default function SdkPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}

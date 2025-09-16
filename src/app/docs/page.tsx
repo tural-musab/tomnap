@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 
 // Dynamically import Swagger UI to avoid SSR issues
 const SwaggerUI = dynamic(
-  () => import('swagger-ui-react').then((mod) => mod.default) as any,
+  () => import('swagger-ui-react').then((mod) => mod.default),
   {
     ssr: false,
     loading: () => (
@@ -14,9 +14,9 @@ const SwaggerUI = dynamic(
       </div>
     )
   }
-)
+) as any
 
-export default function ApiDocsPage(): JSX.Element {
+export default function ApiDocsPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -64,7 +64,7 @@ export default function ApiDocsPage(): JSX.Element {
             showExtensions={true}
             showCommonExtensions={true}
             tryItOutEnabled={true}
-            requestInterceptor={(request) => {
+            requestInterceptor={(request: any) => {
               // Add authorization header if token exists
               const token = localStorage.getItem('supabase.auth.token')
               if (token) {
@@ -72,7 +72,7 @@ export default function ApiDocsPage(): JSX.Element {
               }
               return request
             }}
-            onComplete={(system) => {
+            onComplete={(system: any) => {
               console.log('Swagger UI loaded:', system)
             }}
           />

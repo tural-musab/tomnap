@@ -177,8 +177,8 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     this.props.onError?.(error, errorInfo)
 
     // Log error to external service (e.g., Sentry)
-    if (typeof window !== 'undefined' && window.Sentry) {
-      window.Sentry.captureException(error, {
+    if (typeof window !== 'undefined' && (window as any).Sentry) {
+      (window as any).Sentry.captureException(error, {
         contexts: {
           react: {
             componentStack: errorInfo.componentStack,
@@ -220,8 +220,8 @@ export function useErrorHandler() {
     console.error('Manual error report:', error)
     
     // Report to Sentry
-    if (typeof window !== 'undefined' && window.Sentry) {
-      window.Sentry.captureException(error, {
+    if (typeof window !== 'undefined' && (window as any).Sentry) {
+      (window as any).Sentry.captureException(error, {
         contexts: errorInfo ? {
           react: errorInfo,
         } : undefined,

@@ -82,7 +82,7 @@ export async function generateMetadata({ params }: { params?: AnyPromise }): Pro
       'TomNAP',
       'online alışveriş',
       'e-ticaret',
-    ].filter(Boolean),
+    ].filter((k): k is string => typeof k === 'string'),
     openGraph: {
       title: productTitle,
       description: productDescription,

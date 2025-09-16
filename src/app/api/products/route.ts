@@ -94,7 +94,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     // Validate query parameters
     const validation = validateSearchParams(paginationSchema)(searchParams)
     if (!validation.success) {
-      return createErrorResponse(validation.error)
+      return createErrorResponse((validation as any).error)
     }
     
     const { page, limit } = validation.data
@@ -289,7 +289,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     // Validate request body
     const validation = await validateRequestBody(createProductSchema)(request)
     if (!validation.success) {
-      return createErrorResponse(validation.error)
+      return createErrorResponse((validation as any).error)
     }
     
     const data = validation.data
