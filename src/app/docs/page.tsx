@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 
 // Dynamically import Swagger UI to avoid SSR issues
 const SwaggerUI = dynamic(
-  () => import('swagger-ui-react').then((mod) => mod.default),
+  () => import('swagger-ui-react').then((mod) => mod.default) as any,
   {
     ssr: false,
     loading: () => (

@@ -3,7 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import type { Database } from '@/types/database.types'
 
 // Validation schemas
 const loginSchema = z.object({
@@ -91,21 +90,9 @@ export async function register(formData: FormData) {
     return { error: authError.message }
   }
 
-  if (authData.user) {
-    // Create profile
-    const profileInsert: Database['public']['Tables']['profiles']['Insert'] = {
-      id: authData.user.id,
-      username: validatedData.username,
-      full_name: validatedData.fullName ?? null,
-      avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${validatedData.username}`,
-    }
-
-    const { error: profileError } = await supabase.from('profiles').insert(profileInsert)
-
-    if (profileError) {
-      return { error: 'Profil oluşturulurken hata oluştu' }
-    }
-  }
+  // Profile creation is handled automatically by Supabase trigger
+  // See: migrations/0005_profiles_on_signup.sql
+  // The trigger creates a profile when a new user signs up with the metadata
 
   redirect('/feed')
 }

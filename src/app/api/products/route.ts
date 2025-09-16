@@ -80,7 +80,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request: NextRequest): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url)
-    const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'anonymous'
+    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous'
     
     // Rate limiting
     if (!checkRateLimit(`products:${clientIp}`, 60, 60000)) {
@@ -275,7 +275,7 @@ export async function GET(request: NextRequest): Promise<Response> {
  */
 export async function POST(request: NextRequest): Promise<Response> {
   try {
-    const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'anonymous'
+    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous'
     
     // Rate limiting for POST requests (stricter)
     if (!checkRateLimit(`products:post:${clientIp}`, 10, 60000)) {
@@ -317,7 +317,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     // Insert product
     const { data: product, error } = await supabase
       .from('products')
-      .insert(sanitizedData)
+      .insert(sanitizedData as any)
       .select()
       .single()
     

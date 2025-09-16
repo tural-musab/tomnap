@@ -7,25 +7,21 @@ export async function POST(): Promise<Response> {
   }
   const supabase = await createClient()
 
-  // Explicitly type the selected columns so that TypeScript can infer the
-  // shape of the response instead of widening it to `never`.
-  type RowId = {
-    id: string
-  }
-
-  const { data: videos } = await supabase
+  const videosResponse = await supabase
     .from('videos')
     .select('id')
-    .returns<RowId>()
     .order('created_at', { ascending: false })
     .limit(2)
-
-  const { data: products } = await supabase
+  
+  const productsResponse = await supabase
     .from('products')
     .select('id')
-    .returns<RowId>()
     .order('created_at', { ascending: false })
     .limit(2)
+    
+  const videos = videosResponse.data as { id: string }[] | null
+  const products = productsResponse.data as { id: string }[] | null
+    
   if (!videos?.length || !products?.length) {
     return NextResponse.json(
       { error: 'Videos or products missing. Seed them first.' },
@@ -34,9 +30,9 @@ export async function POST(): Promise<Response> {
   }
 
   const pairs = [
-    { video_id: videos[0]!.id, product_id: products[0]!.id },
-    { video_id: videos[0]!.id, product_id: products[1]!.id },
-    { video_id: videos[1]!.id, product_id: products[0]!.id },
+    { video_id: videos[0].id, product_id: products[0].id },
+    { video_id: videos[0].id, product_id: products[1].id },
+    { video_id: videos[1].id, product_id: products[0].id },
   ]
 
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY

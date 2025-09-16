@@ -11,8 +11,15 @@ export async function GET() {
     .select('id, username, role')
     .eq('id', user.id)
     .single()
+  
+  const profileData = profile as { id: string; username: string; role: string } | null
 
-  return NextResponse.json({ authenticated: true, user_id: user.id, email: user.email, role: profile?.role ?? null })
+  return NextResponse.json({ 
+    authenticated: true, 
+    user_id: user.id, 
+    email: user.email, 
+    role: profileData?.role ?? null 
+  })
 }
 
 

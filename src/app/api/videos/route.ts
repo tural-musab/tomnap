@@ -83,7 +83,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request: NextRequest): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url)
-    const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'anonymous'
+    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous'
     
     // Rate limiting
     if (!checkRateLimit(`videos:${clientIp}`, 100, 60000)) {
@@ -232,7 +232,7 @@ export async function GET(request: NextRequest): Promise<Response> {
  */
 export async function POST(request: NextRequest): Promise<Response> {
   try {
-    const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'anonymous'
+    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous'
     
     // Rate limiting for POST requests (stricter)
     if (!checkRateLimit(`videos:post:${clientIp}`, 5, 60000)) {
@@ -275,7 +275,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     // Insert video
     const { data: video, error } = await supabase
       .from('videos')
-      .insert(sanitizedData)
+      .insert(sanitizedData as any)
       .select()
       .single()
     
