@@ -12,16 +12,21 @@ const loginSchema = z.object({
   password: z.string().min(6, 'Şifre en az 6 karakter olmalıdır'),
 })
 
-const registerSchema = z.object({
-  email: z.string().email('Geçerli bir email adresi giriniz'),
-  password: z.string().min(6, 'Şifre en az 6 karakter olmalıdır'),
-  confirmPassword: z.string(),
-  username: z.string().min(3, 'Kullanıcı adı en az 3 karakter olmalıdır').regex(/^[a-zA-Z0-9_]+$/, 'Kullanıcı adı sadece harf, rakam ve _ içerebilir'),
-  fullName: z.string().min(2, 'Ad soyad en az 2 karakter olmalıdır').optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Şifreler eşleşmiyor',
-  path: ['confirmPassword'],
-})
+const registerSchema = z
+  .object({
+    email: z.string().email('Geçerli bir email adresi giriniz'),
+    password: z.string().min(6, 'Şifre en az 6 karakter olmalıdır'),
+    confirmPassword: z.string(),
+    username: z
+      .string()
+      .min(3, 'Kullanıcı adı en az 3 karakter olmalıdır')
+      .regex(/^[a-zA-Z0-9_]+$/, 'Kullanıcı adı sadece harf, rakam ve _ içerebilir'),
+    fullName: z.string().min(2, 'Ad soyad en az 2 karakter olmalıdır').optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Şifreler eşleşmiyor',
+    path: ['confirmPassword'],
+  })
 
 export async function login(formData: FormData) {
   const supabase = (await createClient()) as SupabaseClient<Database>
@@ -47,7 +52,7 @@ export async function login(formData: FormData) {
 }
 
 export async function register(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = (await createClient()) as SupabaseClient<Database>
 
   const rawData = {
     email: formData.get('email') as string,
@@ -96,9 +101,7 @@ export async function register(formData: FormData) {
       avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${validatedData.username}`,
     }
 
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert(profileInsert)
+    const { error: profileError } = await supabase.from('profiles').insert(profileInsert)
 
     if (profileError) {
       return { error: 'Profil oluşturulurken hata oluştu' }
@@ -116,7 +119,7 @@ export async function logout() {
 
 export async function loginWithGoogle() {
   const supabase = await createClient()
-  
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
@@ -139,7 +142,7 @@ export async function loginWithGoogle() {
 
 export async function loginWithGithub() {
   const supabase = await createClient()
-  
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
@@ -158,7 +161,7 @@ export async function loginWithGithub() {
 
 export async function resetPassword(formData: FormData) {
   const supabase = await createClient()
-  
+
   const email = formData.get('email') as string
 
   if (!email) {
@@ -178,7 +181,7 @@ export async function resetPassword(formData: FormData) {
 
 export async function updatePassword(formData: FormData) {
   const supabase = await createClient()
-  
+
   const password = formData.get('password') as string
   const confirmPassword = formData.get('confirmPassword') as string
 
