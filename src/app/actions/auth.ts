@@ -101,7 +101,7 @@ export async function register(formData: FormData) {
       avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${validatedData.username}`,
     }
 
-    const { error: profileError } = await supabase.from('profiles').insert(profileInsert)
+    const { error: profileError } = await supabase.from('profiles').insert([profileInsert])
 
     if (profileError) {
       return { error: 'Profil oluşturulurken hata oluştu' }
