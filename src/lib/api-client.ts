@@ -201,13 +201,12 @@ export class TomNAPApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...options.headers,
+    const headers = new Headers(options.headers)
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json')
     }
-
     if (this.apiKey) {
-      headers.Authorization = `Bearer ${this.apiKey}`
+      headers.set('Authorization', `Bearer ${this.apiKey}`)
     }
 
     const requestOptions: RequestInit = {
@@ -333,8 +332,7 @@ export const createLocalClient = (apiKey?: string) =>
     apiKey,
   })
 
-// Type exports for consumers
-export type { TomNAPConfig, PaginationParams, ApiResponse, ApiError }
+// Type exports for consumers are already declared above
 
 // Example usage:
 /*
