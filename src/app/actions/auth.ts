@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import type { Database } from '@/types/database.types'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Validation schemas
 const loginSchema = z.object({
@@ -29,7 +28,7 @@ const registerSchema = z
   })
 
 export async function login(formData: FormData) {
-  const supabase = (await createClient()) as SupabaseClient<Database>
+  const supabase = await createClient()
 
   const rawData = {
     email: formData.get('email') as string,
@@ -52,7 +51,7 @@ export async function login(formData: FormData) {
 }
 
 export async function register(formData: FormData) {
-  const supabase = (await createClient()) as SupabaseClient<Database>
+  const supabase = await createClient()
 
   const rawData = {
     email: formData.get('email') as string,
@@ -101,7 +100,7 @@ export async function register(formData: FormData) {
       avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${validatedData.username}`,
     }
 
-    const { error: profileError } = await supabase.from('profiles').insert([profileInsert])
+    const { error: profileError } = await supabase.from('profiles').insert(profileInsert)
 
     if (profileError) {
       return { error: 'Profil oluşturulurken hata oluştu' }
