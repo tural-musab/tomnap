@@ -177,6 +177,33 @@ jobs:
         with:
           name: build-files
 
+      - name: Setup Node.js for Vercel
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm for Vercel
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies for Vercel
+        run: pnpm install --frozen-lockfile
+
+      - name: Create environment file for Vercel
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.local
+          echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env.local
+          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.local
+          echo "SENTRY_ORG=${{ secrets.SENTRY_ORG }}" >> .env.local
+          echo "SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}" >> .env.local
+
+      - name: Build Vercel output
+        run: npx vercel build
+
       - name: Deploy to Vercel (Staging)
         uses: amondnet/vercel-action@v25
         with:
@@ -202,6 +229,33 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-files
+
+      - name: Setup Node.js for Vercel
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm for Vercel
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies for Vercel
+        run: pnpm install --frozen-lockfile
+
+      - name: Create environment file for Vercel
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env.local
+          echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env.local
+          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env.local
+          echo "SENTRY_ORG=${{ secrets.SENTRY_ORG }}" >> .env.local
+          echo "SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}" >> .env.local
+
+      - name: Build Vercel output
+        run: npx vercel build
 
       - name: Deploy to Vercel (Production)
         uses: amondnet/vercel-action@v25
