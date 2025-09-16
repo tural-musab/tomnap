@@ -2,7 +2,7 @@ name: Database Operations
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'supabase/migrations/**'
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
     name: Database Migration
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event.inputs.operation == 'migrate'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -48,7 +48,7 @@ jobs:
     name: Database Backup
     runs-on: ubuntu-latest
     if: github.event.inputs.operation == 'backup'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.inputs.operation == 'seed'
     environment: staging
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -87,7 +87,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: '9'
+          version: '10.12.4'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
