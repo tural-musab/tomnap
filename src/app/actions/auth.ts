@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database.types'
 
 // Validation schemas
 const loginSchema = z.object({
