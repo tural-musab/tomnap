@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactElement } from 'react'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Script from 'next/script'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import RegisterSW from '@/components/register-sw'
 import './globals.css'
 import SonnerToaster from '@/components/ui/sonner-toaster'
@@ -192,6 +193,9 @@ export default async function RootLayout({
 
         {/* PWA Service Worker Registration */}
         <RegisterSW />
+
+        {/* Vercel Speed Insights */}
+        <SpeedInsights />
 
         {/* Structured Data - Organization */}
         <Script
