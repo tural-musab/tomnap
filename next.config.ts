@@ -154,10 +154,16 @@ const nextConfig: NextConfig = {
   },
   // Rewrites for API proxy
   async rewrites() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!supabaseUrl) {
+      // Prevent build failure when the env var is absent (e.g. in preview deployments)
+      console.warn('NEXT_PUBLIC_SUPABASE_URL is not set; skipping Supabase proxy rewrite.')
+      return []
+    }
     return [
       {
         source: '/api/supabase/:path*',
-        destination: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/:path*`,
+        destination: `${supabaseUrl}/:path*`,
       },
     ]
   },
