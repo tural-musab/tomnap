@@ -204,17 +204,11 @@ jobs:
       - name: Pull Vercel Project Settings
         run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Vercel output
+      - name: Build Vercel output for staging
         run: npx vercel build
 
       - name: Deploy to Vercel (Staging)
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prebuilt'
-          scope: ${{ secrets.VERCEL_ORG_ID }}
+        run: npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
 
   # Job 5: Deploy to production (only on main branch)
   deploy-production:
@@ -260,17 +254,11 @@ jobs:
       - name: Pull Vercel Project Settings
         run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Vercel output
-        run: npx vercel build
+      - name: Build Vercel output for production
+        run: npx vercel build --prod
 
       - name: Deploy to Vercel (Production)
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prebuilt --prod'
-          scope: ${{ secrets.VERCEL_ORG_ID }}
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Create GitHub Release
         if: success()
