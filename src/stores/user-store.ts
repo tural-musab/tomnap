@@ -35,9 +35,10 @@ export const useUserStore = create<UserStore>()(
 
       fetchProfile: async (userId) => {
         set({ isLoading: true })
-        const supabase = createClient() as SupabaseClient<Database>
+        const supabase: SupabaseClient<Database> = createClient()
         
         const { data: profile, error } = await supabase
+          .schema('public')
           .from('profiles')
           .select('*')
           .eq('id', userId)
@@ -55,9 +56,10 @@ export const useUserStore = create<UserStore>()(
         if (!user || !profile) return
 
         set({ isLoading: true })
-        const supabase = createClient()
+        const supabase: SupabaseClient<Database> = createClient()
         
         const { data: updatedProfile, error } = await supabase
+          .schema('public')
           .from('profiles')
           .update(updates)
           .eq('id', user.id)
@@ -77,7 +79,7 @@ export const useUserStore = create<UserStore>()(
 
       checkAuth: async () => {
         set({ isLoading: true })
-        const supabase = createClient()
+        const supabase: SupabaseClient<Database> = createClient()
         
         const { data: { user } } = await supabase.auth.getUser()
         

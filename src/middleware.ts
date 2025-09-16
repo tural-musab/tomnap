@@ -99,7 +99,7 @@ export async function middleware(request: NextRequest) {
   })
 
   // Rate limiting (IP + window)
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
   const now = Date.now()
   const key = String(ip)
   const current = ipCounters.get(key)

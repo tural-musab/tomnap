@@ -32,7 +32,7 @@ export async function GET() {
     const baseUrl = 'https://tomnap.com'
     const now = new Date().toISOString()
     
-    const rssItems = (videos || []).map(video => {
+    const rssItems = ((videos || []) as any[]).map((video: any) => {
       const creatorName = video.creator?.full_name || video.creator?.username || 'TomNAP Creator'
       const videoTitle = video.title || 'TomNAP Video'
       const videoDescription = video.description || `${creatorName} tarafından paylaşılan video`

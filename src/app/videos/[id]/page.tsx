@@ -49,11 +49,12 @@ export async function generateMetadata({ params }: { params?: AnyPromise }): Pro
     }
   }
 
-  const videoTitle = video.title || 'TomNAP Video'
+  const v = video as any
+  const videoTitle = v.title || 'TomNAP Video'
   const videoDescription =
-    video.description ||
-    `${video.creator?.full_name || video.creator?.username || 'Anonim'} tarafından paylaşılan video`
-  const creatorName = video.creator?.full_name || video.creator?.username || 'TomNAP Creator'
+    v.description ||
+    `${v.creator?.full_name || v.creator?.username || 'Anonim'} tarafından paylaşılan video`
+  const creatorName = v.creator?.full_name || v.creator?.username || 'TomNAP Creator'
 
   return {
     title: videoTitle,
@@ -64,17 +65,17 @@ export async function generateMetadata({ params }: { params?: AnyPromise }): Pro
       'TomNAP video',
       'sosyal ticaret',
       'video alışveriş',
-      ...(video.tags || []),
+      ...(v.tags || []),
     ],
     openGraph: {
       title: videoTitle,
       description: videoDescription,
-      url: `https://tomnap.com/videos/${video.id}`,
+      url: `https://tomnap.com/videos/${v.id}`,
       siteName: 'TomNAP',
-      images: video.thumbnail_url
+      images: v.thumbnail_url
         ? [
             {
-              url: video.thumbnail_url,
+              url: v.thumbnail_url,
               width: 1200,
               height: 630,
               alt: videoTitle,
@@ -85,8 +86,8 @@ export async function generateMetadata({ params }: { params?: AnyPromise }): Pro
       type: 'video.other',
       videos: [
         {
-          url: video.video_url,
-          secureUrl: video.video_url,
+          url: v.video_url,
+          secureUrl: v.video_url,
           type: 'video/mp4',
           width: 1080,
           height: 1920,
@@ -97,11 +98,11 @@ export async function generateMetadata({ params }: { params?: AnyPromise }): Pro
       card: 'player',
       title: videoTitle,
       description: videoDescription,
-      images: video.thumbnail_url ? [video.thumbnail_url] : [],
+      images: v.thumbnail_url ? [v.thumbnail_url] : [],
       players: [
         {
-          playerUrl: `https://tomnap.com/videos/${video.id}/embed`,
-          streamUrl: video.video_url,
+          playerUrl: `https://tomnap.com/videos/${v.id}/embed`,
+          streamUrl: v.video_url,
           width: 480,
           height: 854,
         },
@@ -118,17 +119,18 @@ export default async function VideoPage({ params }: { params?: AnyPromise }) {
     notFound()
   }
 
-  const creatorName = video.creator?.full_name || video.creator?.username || 'TomNAP Creator'
+  const v = video as any
+  const creatorName = v.creator?.full_name || v.creator?.username || 'TomNAP Creator'
   const videoSchema = {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
-    name: video.title || 'TomNAP Video',
-    description: video.description || `${creatorName} tarafından paylaşılan video`,
-    thumbnailUrl: video.thumbnail_url,
-    uploadDate: video.created_at,
-    duration: video.duration ? `PT${video.duration}S` : undefined,
-    contentUrl: video.video_url,
-    embedUrl: `https://tomnap.com/videos/${video.id}/embed`,
+    name: v.title || 'TomNAP Video',
+    description: v.description || `${creatorName} tarafından paylaşılan video`,
+    thumbnailUrl: v.thumbnail_url,
+    uploadDate: v.created_at,
+    duration: v.duration ? `PT${v.duration}S` : undefined,
+    contentUrl: v.video_url,
+    embedUrl: `https://tomnap.com/videos/${v.id}/embed`,
     publisher: {
       '@type': 'Organization',
       name: 'TomNAP',
@@ -140,22 +142,22 @@ export default async function VideoPage({ params }: { params?: AnyPromise }) {
     author: {
       '@type': 'Person',
       name: creatorName,
-      url: `https://tomnap.com/profile/${video.creator?.username}`,
-      image: video.creator?.avatar_url,
+      url: `https://tomnap.com/profile/${v.creator?.username}`,
+      image: v.creator?.avatar_url,
     },
     interactionStatistic: [
       {
         '@type': 'InteractionCounter',
         interactionType: 'https://schema.org/WatchAction',
-        userInteractionCount: video.views_count || 0,
+        userInteractionCount: v.views_count || 0,
       },
       {
         '@type': 'InteractionCounter',
         interactionType: 'https://schema.org/LikeAction',
-        userInteractionCount: video.likes_count || 0,
+        userInteractionCount: v.likes_count || 0,
       },
     ],
-    keywords: video.tags ? video.tags.join(', ') : undefined,
+    keywords: v.tags ? v.tags.join(', ') : undefined,
     inLanguage: 'tr-TR',
     isFamilyFriendly: true,
   }
@@ -180,8 +182,8 @@ export default async function VideoPage({ params }: { params?: AnyPromise }) {
       {
         '@type': 'ListItem',
         position: 3,
-        name: video.title || 'Video',
-        item: `https://tomnap.com/videos/${video.id}`,
+        name: v.title || 'Video',
+        item: `https://tomnap.com/videos/${v.id}`,
       },
     ],
   }
@@ -210,8 +212,8 @@ export default async function VideoPage({ params }: { params?: AnyPromise }) {
         <div className="lg:col-span-2">
           <div className="aspect-[9/16] md:aspect-video relative rounded-lg overflow-hidden bg-black">
             <video
-              src={video.video_url}
-              poster={video.thumbnail_url}
+              src={v.video_url}
+              poster={v.thumbnail_url}
               controls
               className="w-full h-full object-contain"
               preload="metadata"
@@ -222,18 +224,18 @@ export default async function VideoPage({ params }: { params?: AnyPromise }) {
 
           {/* Video Info */}
           <div className="mt-6 space-y-4">
-            <h1 className="text-2xl font-bold text-foreground">{video.title || 'TomNAP Video'}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{v.title || 'TomNAP Video'}</h1>
 
-            {video.description && (
-              <p className="text-muted-foreground leading-relaxed">{video.description}</p>
+            {v.description && (
+              <p className="text-muted-foreground leading-relaxed">{v.description}</p>
             )}
 
             {/* Creator Info */}
-            {video.creator && (
+            {v.creator && (
               <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
-                {video.creator.avatar_url && (
+                {v.creator.avatar_url && (
                   <img
-                    src={video.creator.avatar_url}
+                    src={v.creator.avatar_url}
                     alt={creatorName}
                     className="w-12 h-12 rounded-full object-cover"
                   />
@@ -241,11 +243,11 @@ export default async function VideoPage({ params }: { params?: AnyPromise }) {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">{creatorName}</span>
-                    {video.creator.is_verified && <span className="text-blue-500 text-sm">✓</span>}
+                    {v.creator.is_verified && <span className="text-blue-500 text-sm">✓</span>}
                   </div>
-                  {video.creator.follower_count !== null && (
+                  {v.creator.follower_count !== null && (
                     <span className="text-sm text-muted-foreground">
-                      {video.creator.follower_count} takipçi
+                      {v.creator.follower_count} takipçi
                     </span>
                   )}
                 </div>
@@ -253,9 +255,9 @@ export default async function VideoPage({ params }: { params?: AnyPromise }) {
             )}
 
             {/* Tags */}
-            {video.tags && video.tags.length > 0 && (
+            {v.tags && v.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {video.tags.map((tag, index) => (
+                {v.tags.map((tag: string, index: number) => (
                   <span
                     key={index}
                     className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm"
@@ -268,14 +270,14 @@ export default async function VideoPage({ params }: { params?: AnyPromise }) {
 
             {/* Stats */}
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              {video.views_count !== null && (
-                <span>{video.views_count.toLocaleString('tr-TR')} görüntüleme</span>
+              {v.views_count !== null && (
+                <span>{v.views_count.toLocaleString('tr-TR')} görüntüleme</span>
               )}
-              {video.likes_count !== null && (
-                <span>{video.likes_count.toLocaleString('tr-TR')} beğeni</span>
+              {v.likes_count !== null && (
+                <span>{v.likes_count.toLocaleString('tr-TR')} beğeni</span>
               )}
               <span>
-                {new Date(video.created_at).toLocaleDateString('tr-TR', {
+                {new Date(v.created_at).toLocaleDateString('tr-TR', {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
@@ -289,9 +291,9 @@ export default async function VideoPage({ params }: { params?: AnyPromise }) {
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Videodaki Ürünler</h2>
 
-          {video.video_products && video.video_products.length > 0 ? (
+          {v.video_products && v.video_products.length > 0 ? (
             <div className="space-y-4">
-              {video.video_products.map((vp, index) => {
+              {v.video_products.map((vp: any, index: number) => {
                 const product = vp.product
                 if (!product) return null
 

@@ -25,9 +25,9 @@ export const createProductSchema = z.object({
   tags: z.array(z.string()).optional(),
   sku: z.string().optional(),
   stock_quantity: z.number().int().min(0).default(0),
-  specs: z.record(z.any()).optional(),
-  variants: z.array(z.any()).optional(),
-  shipping_info: z.record(z.any()).optional(),
+  specs: z.record(z.string(), z.unknown()).optional(),
+  variants: z.array(z.unknown()).optional(),
+  shipping_info: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const updateProductSchema = createProductSchema.partial()
@@ -40,7 +40,7 @@ export const createVideoSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
   description: z.string().max(2000).optional(),
   duration: z.number().positive('Duration must be positive'),
-  music_info: z.record(z.any()).optional(),
+  music_info: z.record(z.string(), z.unknown()).optional(),
   hashtags: z.array(z.string()).optional(),
   is_shoppable: z.boolean().default(false),
 })
@@ -73,7 +73,7 @@ export const createOrderSchema = z.object({
     product_id: z.string().uuid(),
     quantity: z.number().int().positive(),
     price: z.number().positive(),
-    variant: z.record(z.any()).optional(),
+    variant: z.record(z.string(), z.unknown()).optional(),
   })).min(1, 'Order must have at least one item'),
   shipping_address: z.object({
     name: z.string().min(1),
@@ -132,7 +132,7 @@ export function validateRequestBody<T>(schema: z.ZodSchema<T>) {
           error: {
             error: 'Validation Error',
             message: 'Invalid request body',
-            details: error.errors,
+            details: error.issues,
             status: 400
           }
         }
@@ -162,7 +162,7 @@ export function validateSearchParams<T>(schema: z.ZodSchema<T>) {
           error: {
             error: 'Validation Error',
             message: 'Invalid query parameters',
-            details: error.errors,
+            details: error.issues,
             status: 400
           }
         }
@@ -191,7 +191,7 @@ export function validatePathParams<T>(schema: z.ZodSchema<T>) {
           error: {
             error: 'Validation Error',
             message: 'Invalid path parameters',
-            details: error.errors,
+            details: error.issues,
             status: 400
           }
         }

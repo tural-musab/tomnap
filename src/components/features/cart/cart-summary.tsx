@@ -63,8 +63,9 @@ export default function CartSummary() {
               .select('id')
               .single()
             if (!error && orderRow) {
+              const order = orderRow as { id: string }
               const orderItems: import('@/types/database.types').Database['public']['Tables']['order_items']['Insert'][] = items.map((it) => ({
-                order_id: orderRow.id,
+                order_id: order.id,
                 product_id: it.product_id,
                 vendor_id: it.vendor_id,
                 quantity: it.quantity,
@@ -72,11 +73,11 @@ export default function CartSummary() {
                 subtotal: ((it.sale_price || it.price) as number) * it.quantity,
                 status: 'pending',
               }))
-              await supabase.from('order_items').insert(orderItems)
+              await supabase.from('order_items').insert(orderItems as any)
               
               endTimer('checkout_process')
               recordUserAction('checkout_success', { 
-                order_id: orderRow.id, 
+                order_id: order.id, 
                 items: count, 
                 total 
               })

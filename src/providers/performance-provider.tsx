@@ -7,7 +7,7 @@ interface PerformanceProviderProps {
   children: React.ReactNode
 }
 
-export function PerformanceProvider({ children }: PerformanceProviderProps): JSX.Element {
+export function PerformanceProvider({ children }: PerformanceProviderProps) {
   const { recordPageView } = usePerformanceMonitor()
 
   React.useEffect(() => {

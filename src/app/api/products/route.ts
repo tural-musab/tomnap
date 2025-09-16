@@ -80,7 +80,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request: NextRequest): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url)
-    const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'anonymous'
+    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous'
     
     // Rate limiting
     if (!checkRateLimit(`products:${clientIp}`, 60, 60000)) {
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     // Validate query parameters
     const validation = validateSearchParams(paginationSchema)(searchParams)
     if (!validation.success) {
-      return createErrorResponse(validation.error)
+      return createErrorResponse((validation as any).error)
     }
     
     const { page, limit } = validation.data
@@ -275,7 +275,7 @@ export async function GET(request: NextRequest): Promise<Response> {
  */
 export async function POST(request: NextRequest): Promise<Response> {
   try {
-    const clientIp = request.ip || request.headers.get('x-forwarded-for') || 'anonymous'
+    const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'anonymous'
     
     // Rate limiting for POST requests (stricter)
     if (!checkRateLimit(`products:post:${clientIp}`, 10, 60000)) {
@@ -289,7 +289,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     // Validate request body
     const validation = await validateRequestBody(createProductSchema)(request)
     if (!validation.success) {
-      return createErrorResponse(validation.error)
+      return createErrorResponse((validation as any).error)
     }
     
     const data = validation.data
@@ -317,7 +317,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     // Insert product
     const { data: product, error } = await supabase
       .from('products')
-      .insert(sanitizedData)
+      .insert(sanitizedData as any)
       .select()
       .single()
     

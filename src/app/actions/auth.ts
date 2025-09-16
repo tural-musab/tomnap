@@ -3,8 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import type { Database } from '@/types/database.types'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Validation schemas
 const loginSchema = z.object({
@@ -93,6 +91,9 @@ export async function register(formData: FormData) {
   }
 
   // Profiles kaydı Supabase trigger'ı tarafından oluşturuluyor (migrations/0005_profiles_on_signup.sql)
+  // Profile creation is handled automatically by Supabase trigger
+  // See: migrations/0005_profiles_on_signup.sql
+  // The trigger creates a profile when a new user signs up with the metadata
 
   redirect('/feed')
 }

@@ -127,7 +127,7 @@ export function usePerformanceTracking(config: PerformanceConfig = {}): {
     reportCustomMetric: useCallback(
       (name: string, value: number, rating?: 'good' | 'needs-improvement' | 'poor') => {
         const customMetric: Metric = {
-          name: `custom-${name}`,
+          name: `custom-${name}` as any,
           value,
           rating: rating || (value < 100 ? 'good' : value < 300 ? 'needs-improvement' : 'poor'),
           delta: 0,
@@ -300,7 +300,7 @@ export function usePerformanceDashboard(): {
       }
     })
 
-    return scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0
+    return scores.length > 0 ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : 0
   }, [])
 
   return {

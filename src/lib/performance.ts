@@ -232,7 +232,7 @@ class PerformanceMonitor {
         value: entry.domContentLoadedEventEnd - entry.domContentLoadedEventStart,
       },
       { name: 'navigation_load_complete', value: entry.loadEventEnd - entry.loadEventStart },
-      { name: 'navigation_total', value: entry.loadEventEnd - entry.navigationStart },
+      { name: 'navigation_total', value: entry.loadEventEnd - entry.startTime },
     ]
 
     navigationMetrics.forEach(({ name, value }) => {
@@ -439,7 +439,7 @@ class PerformanceMonitor {
     this.recordCustomMetric({
       name: `user_action_${action}`,
       value: 1,
-      labels: details,
+      labels: details ? Object.fromEntries(Object.entries(details).map(([k, v]) => [k, String(v)])) : undefined,
     })
   }
 

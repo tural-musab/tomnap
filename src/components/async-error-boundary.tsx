@@ -42,8 +42,8 @@ class AsyncErrorBoundary extends React.Component<AsyncErrorBoundaryProps, AsyncE
       this.props.onError?.(error)
       
       // Log to Sentry
-      if (typeof window !== 'undefined' && window.Sentry) {
-        window.Sentry.captureException(error, {
+      if (typeof window !== 'undefined' && (window as any).Sentry) {
+        (window as any).Sentry.captureException(error, {
           tags: {
             errorBoundary: 'AsyncErrorBoundary',
             errorType: 'unhandledRejection',
@@ -109,8 +109,8 @@ export function withAsyncErrorHandler<T extends (...args: any[]) => Promise<any>
       onError?.(error)
       
       // Log to Sentry
-      if (typeof window !== 'undefined' && window.Sentry) {
-        window.Sentry.captureException(error, {
+      if (typeof window !== 'undefined' && (window as any).Sentry) {
+        (window as any).Sentry.captureException(error, {
           tags: {
             errorBoundary: 'AsyncErrorHandler',
             errorType: 'asyncFunction',

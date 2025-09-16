@@ -90,7 +90,7 @@ export const useCartStore = create<CartStore>()(
         }
 
         // Sync with database if user is logged in
-        const supabase = createClient() as SupabaseClient<Database>
+        const supabase: SupabaseClient<Database> = createClient()
         const {
           data: { user },
         } = await supabase.auth.getUser()
@@ -139,7 +139,7 @@ export const useCartStore = create<CartStore>()(
       },
 
       syncWithDatabase: async () => {
-        const supabase = createClient()
+        const supabase: SupabaseClient<Database> = createClient()
         const {
           data: { user },
         } = await supabase.auth.getUser()
@@ -158,11 +158,14 @@ export const useCartStore = create<CartStore>()(
               user_id: user.id,
               product_id: item.product_id,
               quantity: item.quantity,
-              variant: (item.variant ?? null) as Database['public']['Tables']['cart_items']['Insert']['variant'],
+              variant: (item.variant as unknown as Database['public']['Tables']['cart_items']['Insert']['variant']) ?? null,
             })
           )
 
-          await supabase.from('cart_items').insert(cartItems as Database['public']['Tables']['cart_items']['Insert'][])
+          await supabase
+            .schema('public')
+            .from('cart_items')
+            .insert(cartItems)
         }
       },
     }),

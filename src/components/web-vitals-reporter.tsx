@@ -96,12 +96,11 @@ export function useWebVitals(): { measureMetrics: () => Promise<Record<string, M
         }
       }
 
-      getCLS(collectMetric)
-      getFCP(collectMetric)
-      getFID(collectMetric)
-      getLCP(collectMetric)
-      getTTFB(collectMetric)
-      getINP(collectMetric)
+      onCLS(collectMetric)
+      onFCP(collectMetric)
+      onLCP(collectMetric)
+      onTTFB(collectMetric)
+      onINP(collectMetric)
 
       // Timeout after 5 seconds
       setTimeout(() => resolve(metrics), 5000)
