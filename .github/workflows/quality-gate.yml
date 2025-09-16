@@ -2,19 +2,19 @@ name: Quality Gate
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
 
 jobs:
   code-quality:
     name: Code Quality Analysis
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full git history for better analysis
+          fetch-depth: 0 # Full git history for better analysis
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,7 +24,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: '9'
+          version: '10.12.4'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -62,7 +62,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            
+
             // Read test results
             let testResults = '';
             try {
@@ -94,13 +94,13 @@ jobs:
 
             const body = `
             ## 🔍 Quality Gate Report
-            
+
             ${testResults}
             ${lintResults}
-            
+
             **Commit**: ${context.sha}
             **Branch**: ${context.ref}
-            
+
             ---
             *Automated by GitHub Actions* 🤖
             `;
@@ -122,7 +122,7 @@ jobs:
   performance-budget:
     name: Performance Budget
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -135,7 +135,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: '9'
+          version: '10.12.4'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -169,7 +169,7 @@ jobs:
   accessibility:
     name: Accessibility Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -182,7 +182,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: '9'
+          version: '10.12.4'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
