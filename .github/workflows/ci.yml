@@ -10,6 +10,14 @@ env:
   NODE_VERSION: '20'
   PNPM_VERSION: '10.12.4'
 
+permissions:
+  contents: write
+  actions: write
+  checks: write
+  deployments: write
+  pull-requests: write
+  issues: write
+
 jobs:
   # Job 1: Quality checks (lint, type-check, test)
   quality:
