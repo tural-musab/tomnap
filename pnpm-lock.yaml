@@ -173,6 +173,9 @@ importers:
       eslint-config-prettier:
         specifier: ^10.1.8
         version: 10.1.8(eslint@9.35.0(jiti@2.5.1))
+      eslint-formatter-checkstyle:
+        specifier: ^8.40.0
+        version: 8.40.0
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -5486,6 +5489,13 @@ packages:
     hasBin: true
     peerDependencies:
       eslint: '>=7.0.0'
+
+  eslint-formatter-checkstyle@8.40.0:
+    resolution:
+      {
+        integrity: sha512-OpYAiI2yejMPUlB1O2pkfyNfBQrKNWrMK6X2eOn2vg/q94roDiHnOYExK0isdNglKeaYHA5JtgmuBtokFdj0AA==,
+      }
+    engines: { node: ^12.22.0 || ^14.17.0 || >=16.0.0 }
 
   eslint-import-resolver-node@0.3.9:
     resolution:
@@ -13554,6 +13564,8 @@ snapshots:
   eslint-config-prettier@10.1.8(eslint@9.35.0(jiti@2.5.1)):
     dependencies:
       eslint: 9.35.0(jiti@2.5.1)
+
+  eslint-formatter-checkstyle@8.40.0: {}
 
   eslint-import-resolver-node@0.3.9:
     dependencies:
