@@ -3,6 +3,7 @@ import type { ReactElement } from 'react'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Script from 'next/script'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/next'
 import RegisterSW from '@/components/register-sw'
 import './globals.css'
 import SonnerToaster from '@/components/ui/sonner-toaster'
@@ -196,6 +197,9 @@ export default async function RootLayout({
 
         {/* Vercel Speed Insights */}
         <SpeedInsights />
+
+        {/* Vercel Web Analytics */}
+        <Analytics />
 
         {/* Structured Data - Organization */}
         <Script
